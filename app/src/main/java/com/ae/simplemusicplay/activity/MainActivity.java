@@ -1,4 +1,4 @@
-package com.ae.simplemusicplay;
+package com.ae.simplemusicplay.activity;
 
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.ae.simplemusicplay.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
