@@ -1,7 +1,10 @@
 package com.ae.simplemusicplay.activity;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -17,6 +20,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ae.simplemusicplay.R;
+import com.ae.simplemusicplay.model.SongInfo;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -85,6 +89,8 @@ public class MainActivity extends AppCompatActivity
         }
         return true;
     }
+
+    //OptionsMenu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -92,6 +98,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    //OptionsMenu事件
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -107,6 +114,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    //侧滑菜单点击
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -130,5 +138,54 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    //获取歌曲信息
+    public void searchSongs() {
+
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null,
+                null,
+                null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        while (cursor.moveToNext()) {
+
+            //专辑
+            String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+
+            //歌曲名称
+            String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+
+            //歌曲路径
+            String songPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+            //演唱者
+            String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+
+            //播放时长
+            int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+            //歌曲id
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+
+            //专辑id
+            int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+            if (duration > 120000) {
+
+                SongInfo info = new SongInfo();
+                info.setPath(songPath);
+                info.setSongName(songName);
+                info.setAlbumName(album);
+                info.setAlbumId(albumId);
+                info.setArtistName(artist);
+                // TODO: 暂时去掉
+                //info.setPinyin(HanZi2PinYinUtils.HanZi2PinYin(songName));
+                info.setSongId(id);
+
+                info.setDuration(duration);
+            }
+        }
     }
 }

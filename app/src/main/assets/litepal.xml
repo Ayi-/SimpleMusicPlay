@@ -19,7 +19,7 @@
             For example:    
         <version value="1" ></version>
     -->
-    <version value="1" ></version>
+    <version value="2" ></version>
 
     <!--
         Define your models in the list with mapping tag, LitePal will
@@ -32,7 +32,11 @@
         </list>
     -->
     <list>
-        <mapping class="com.ae.simplemusicplay.model.User"></mapping>
+        <mapping class="com.ae.simplemusicplay.model.AlbumInfo"></mapping>
+        <mapping class="com.ae.simplemusicplay.model.ArtistInfo"></mapping>
+        <mapping class="com.ae.simplemusicplay.model.GeCiMiLyric"></mapping>
+        <mapping class="com.ae.simplemusicplay.model.LrcContent"></mapping>
+        <mapping class="com.ae.simplemusicplay.model.SongInfo"></mapping>
 
     </list>
 </litepal>
