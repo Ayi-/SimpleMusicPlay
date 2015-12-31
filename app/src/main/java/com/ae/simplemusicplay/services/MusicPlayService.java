@@ -7,29 +7,39 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
+import com.ae.simplemusicplay.PlayList;
 import com.ae.simplemusicplay.model.SongInfo;
 
-import org.litepal.crud.DataSupport;
-
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 /**
  * Created by dell on 2015/12/29.
  */
 public class MusicPlayService extends Service /*implements IMusicService*/ {
-    private MediaPlayer mediaPlayer =  new MediaPlayer();       //媒体播放器对象
-    private String path;                        //音乐文件路径
-    private boolean isPause=false;                    //暂停状态
-    private int currentSongId = -1;
+    private MediaPlayer mediaPlayer;       //媒体播放器对象
 
+    private PlayBinder mybinder = new PlayBinder();
+    //歌曲列表
+    private PlayList playList;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onCreate() {
+
+        //创建播放器对象
+        mediaPlayer =  new MediaPlayer();
+        //
+        playList= PlayList.getInstance(getApplicationContext());
+        Log.i("service",playList.getListsize()+"");
+        Log.i("service","create service");
+        super.onCreate();
     }
 
     //播放音乐
@@ -40,28 +50,27 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
 
     /**
      * 播放音乐
-     * @param songId
-     *     音乐id
      */
-    public void playMusic(int songId) {
-        SongInfo songInfo = DataSupport.find(SongInfo.class,songId);
+    public void playMusic(SongInfo song) {
 
         //如果正在播放音乐
         if(mediaPlayer!=null)
         {
             mediaPlayer.reset();
         }
+            //修改为新的播放资源
+            try {
+                Log.i("playMusic","playMusic");
+                mediaPlayer.setDataSource(song.getPath());
+                //必须在prepare()之前调用这个
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                playList.setIsPlaying(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        //修改为新的播放资源
-        try {
-            this.currentSongId = songId;
-            mediaPlayer.setDataSource(songInfo.getPath());
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         /**
          * 通知设置
@@ -69,13 +78,27 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
     }
 
     /**
+     * 下一首
+     */
+    public void playNext(){
+        playMusic(playList.getNext());
+    }
+
+    /**
+     * 上一首
+     */
+    public void playPrevious()
+    {
+        playMusic(playList.getPrevious());
+    }
+    /**
      * 暂停
      */
     //@Override
     public void pauseMusic() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
-            isPause = true;
+            playList.setIsPlaying(false);
         }
     }
 
@@ -94,44 +117,32 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
         }
     }
 
-    //@Override
-    public ArrayList<SongInfo> getCurrentMusicList() {
-        return null;
-    }
-
-    //@Override
-    public ArrayList<SongInfo> getMusicListByName(Integer listId) {
-        return null;
-    }
-
-    //@Override
-//    public ArrayList<MusicList> getMusiclistList() {
-//        return null;
-//    }
-
-    //@Override
-    public void addNetWorkMusic(SongInfo music, Integer listId) {
-
-    }
-
-    //@Override
-    public Integer findMusicOnMobile(Boolean filter) {
-        return null;
+    /**
+     * 继续播放音乐
+     */
+    public void continuePlay()
+    {
+        if(mediaPlayer != null) {
+            mediaPlayer.start();
+            playList.setIsPlaying(true);
+        }
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        Log.i("onBind","return  Bind");
+
+        return mybinder;
     }
 
     /**
      * 音乐操作
      */
-    class PlayBinder extends Binder{
+    public class PlayBinder extends Binder{
 
-        public void play(int musicId){
-            playMusic(musicId);
+        public void play(){
+            playMusic(playList.getCurrentSong());
         }
 
         public void pause(){
@@ -139,13 +150,16 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
         }
 
         public void next(){
-
+            playNext();
         }
 
         public void previous(){
-
+            playPrevious();
         }
-
+        public void continueplay()
+        {
+            continuePlay();
+        }
         public void stop(){
 
         }

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ae.simplemusicplay" >
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name="org.litepal.LitePalApplication"
         android:allowBackup="true"
@@ -21,6 +24,9 @@
         </activity>
         <activity android:name=".activity.PlayerActivity" >
         </activity>
+
+        <activity android:name="com.ae.simplemusicplay.activity.PlayMusic" />
+<service android:name=".services.MusicPlayService"/>
     </application>
 
 </manifest>

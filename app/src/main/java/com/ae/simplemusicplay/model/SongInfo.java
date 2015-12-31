@@ -6,13 +6,13 @@ public class SongInfo extends DataSupport implements Comparable<SongInfo>{
 
     private int id;
 
-    private int songId;
+    private long songId;
 
     private String songName;
 
     private String albumName;
 
-    private int albumId;
+    private long albumId;
 
     private String artistName;
 
@@ -22,21 +22,21 @@ public class SongInfo extends DataSupport implements Comparable<SongInfo>{
 
     private String pinyin;
 
-    private int duration;
+    private long duration;
 
-    public int getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 
-    public int getSongId() {
+    public long getSongId() {
         return songId;
     }
 
-    public void setSongId(int songId) {
+    public void setSongId(long songId) {
         this.songId = songId;
     }
 
@@ -80,11 +80,11 @@ public class SongInfo extends DataSupport implements Comparable<SongInfo>{
         this.artistName = artistName;
     }
 
-    public int getAlbumId() {
+    public long getAlbumId() {
         return albumId;
     }
 
-    public void setAlbumId(int albumId) {
+    public void setAlbumId(long albumId) {
         this.albumId = albumId;
     }
 
