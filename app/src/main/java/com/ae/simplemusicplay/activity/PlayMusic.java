@@ -11,20 +11,30 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ae.simplemusicplay.PlayList;
 import com.ae.simplemusicplay.R;
 import com.ae.simplemusicplay.services.MusicPlayService;
+import com.ae.simplemusicplay.widgets.CircleImageView;
+import com.ae.simplemusicplay.widgets.CircularSeekBar;
 
 import java.util.List;
 
-public class PlayMusic extends Activity implements View.OnClickListener{
+public class PlayMusic extends Activity implements View.OnClickListener {
 
-    private TextView tb_name;
+    //歌曲名
+    private TextView tv_name;
+    //歌手名
+    private TextView tv_singer;
+
     //播放按钮
-    private Button playBtn;
+    private ImageButton imgbtn_play;
+    //上一首
+    private ImageButton previous;
+    //下一首
+    private ImageButton next;
 
     //设置binder，用来和服务通信
     private MusicPlayService.PlayBinder myBinder;
@@ -43,31 +53,44 @@ public class PlayMusic extends Activity implements View.OnClickListener{
 
             myBinder = (MusicPlayService.PlayBinder) service;
             //开始播放
-            tb_name.setText(playList.getCurrentSong().getSongName());
+            tv_name.setText(playList.getCurrentSong().getSongName());
+            tv_singer.setText(playList.getCurrentSong().getArtistName());
+            imgbtn_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
             myBinder.play();
-            playBtn.setText("暂停");
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_play);
+        CircleImageView image = (CircleImageView) findViewById(R.id.album_art);
+        CircularSeekBar seekBar = (CircularSeekBar) findViewById(R.id.song_progress_circular);
+        image.setImageResource(R.mipmap.test_icon);
+        seekBar.setMax(100);
+        seekBar.setProgress(25);
+
         Log.i("playactivity2", "create 1");
-
-        setContentView(R.layout.activity_play_music);
-
         Log.i("playactivity2", "create 2");
 
+        //获取播放列表
         playList = PlayList.getInstance(this);
-        tb_name = (TextView) findViewById(R.id.tv_name);
-        playBtn = (Button) findViewById(R.id.btn_start);
-        playBtn.setOnClickListener(this);
+
+        //获取文本框和按钮
+
+        tv_name = (TextView) findViewById(R.id.tv_name);
+        tv_singer = (TextView) findViewById(R.id.tv_singer);
+        imgbtn_play = (ImageButton) findViewById(R.id.imgbtn_play);
+        previous = (ImageButton) findViewById(R.id.previous);
+        next = (ImageButton) findViewById(R.id.next);
+        imgbtn_play.setOnClickListener(this);
+        previous.setOnClickListener(this);
+        next.setOnClickListener(this);
         //启动服务
         Log.i("playactivity2", "init setvice");
 
         initServiceBinder();
-
     }
-
 
 
     public void initServiceBinder() {
@@ -109,15 +132,17 @@ public class PlayMusic extends Activity implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_start:
-                if(playList.isPlaying()) {
+            case R.id.imgbtn_play:
+                if (playList.isPlaying()) {
                     myBinder.pause();
-                    playBtn.setText("播放");
-                }
-                else {
+                    imgbtn_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+
+                } else {
                     myBinder.continueplay();
-                    tb_name.setText(playList.getCurrentSong().getSongName());
-                    playBtn.setText("暂停");
+                    tv_name.setText(playList.getCurrentSong().getSongName());
+                    tv_singer.setText(playList.getCurrentSong().getArtistName());
+                    imgbtn_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+
                 }
         }
     }

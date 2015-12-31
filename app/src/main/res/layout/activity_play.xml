@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout"
+    android:background="@mipmap/mainlayoutbk"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#D0FFFFFF"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#60000000"
+        android:orientation="horizontal">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:layout_marginTop="20dp"
+            android:src="@mipmap/ic_arrow_back_black_48dp"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="15dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="歌曲：青花瓷"
+                android:layout_margin="10dp"
+                android:textSize="20sp"/>
+            <TextView
+                android:id="@+id/tv_singer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:textSize="15sp"
+                android:text="歌手：周杰伦"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+    <RelativeLayout
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:visibility="visible"
+        android:layout_gravity="center_horizontal">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+
+            android:background="@android:color/transparent">
+
+            <com.ae.simplemusicplay.widgets.CircleImageView
+                android:id="@+id/album_art"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+
+        <com.ae.simplemusicplay.widgets.CircularSeekBar
+            android:id="@+id/song_progress_circular"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:maxHeight="1dp"
+            android:progress="30"
+            app:circle_color="#33000000"
+            app:pointer_color="#0174DF"
+            app:pointer_halo_color="#880174DF" />
+
+
+    </RelativeLayout>
+    <FrameLayout
+        android:alpha="0.9"
+        android:id="@+id/lyric_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="75dp"
+        android:layout_marginBottom="75dp"
+        android:clickable="true"
+        android:background="#60000000"
+        android:visibility="invisible">
+
+<!--        <com.chenjiayao.musicplayer.widgets.LrcView
+            android:id="@+id/lrc_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text=" " />-->
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#60000000"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="50dp">
+
+        <ImageButton
+
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:scaleType="fitXY"
+            android:background="#00FFFFFF"
+            android:src="@mipmap/ic_repeat_grey600_48dp" />
+
+        <ImageButton
+            android:id="@+id/previous"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="90dp"
+            android:scaleType="fitXY"
+            android:background="#00FFFFFF"
+            android:src="@mipmap/ic_skip_previous_black_48dp" />
+
+        <ImageButton
+            android:id="@+id/imgbtn_play"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+
+            android:background="#00FFFFFF"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_play_circle_outline_black_48dp" />
+
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="fitXY"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="90dp"
+            android:background="#00FFFFFF"
+            android:src="@mipmap/ic_skip_next_black_48dp" />
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="fitXY"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:background="#00FFFFFF"
+            android:src="@mipmap/ic_queue_music_grey600_48dp" />
+    </RelativeLayout>
+
+</RelativeLayout>

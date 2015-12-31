@@ -8,9 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -58,17 +56,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ///FAB
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
 
-
-            }
-        });
         //右侧滑动菜单
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -77,6 +65,8 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //处理UI Toast
         handler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 Bundle bundle = msg.getData();
@@ -95,47 +85,33 @@ public class MainActivity extends AppCompatActivity
                     sharePreferenceUtils.setNotFirst();
                 }
             }).start();
-        ImageButton imageIcon = (ImageButton)findViewById(R.id.image_icon);
-        imageIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this,PlayerActivity.class);
-                startActivity(intent);
-            }
-        });
+
 
         }
         Log.i("Simple", "load");
         playList = PlayList.getInstance(this);
 
-
-        btn_play = (Button) findViewById(R.id.btn_play);
-        btn_updatelist = (Button) findViewById(R.id.btn_updatelist);
-        btn_play.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (playList.getListsize() > 0) {
-                    Intent intent = new Intent(MainActivity.this, PlayMusic.class);
-
-                    startActivity(intent);
-
-                }
-                else
-                {
-                    showToast(MainActivity.this,"请更新歌曲列表");
-                }
-            }
-        });
-        btn_updatelist.setOnClickListener(new View.OnClickListener() {
+        //图片打开播放器
+        ImageButton imageIcon = (ImageButton) findViewById(R.id.image_icon);
+        imageIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (playList.getListsize() <= 0) {
                     //更新播放列表
+                    //showToast(MainActivity.this,"并没有音乐");
                     handler.post(runnable);
+                }
+                if (playList.getListsize() > 0) {
+
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, PlayMusic.class);
+                    startActivity(intent);
                 }
             }
         });
+
+
+
     }
 
     //按返回键关掉菜单
@@ -147,7 +123,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-
     }
 
     //两次返回退出APP
@@ -197,20 +172,20 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camara) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+//
+//        if (id == R.id.nav_camara) {
+//            // Handle the camera action
+//        } else if (id == R.id.nav_gallery) {
+//
+//        } else if (id == R.id.nav_slideshow) {
+//
+//        } else if (id == R.id.nav_manage) {
+//
+//        } else if (id == R.id.nav_share) {
+//
+//        } else if (id == R.id.nav_send) {
+//
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -219,7 +194,7 @@ public class MainActivity extends AppCompatActivity
 
     //获取歌曲信息
     public void searchSongs() {
-        showToastForHandler(handler,"正在扫描歌曲");
+        showToastForHandler(handler, "正在扫描歌曲");
         sharePreferenceUtils.setScanFlag(true);
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -273,7 +248,7 @@ public class MainActivity extends AppCompatActivity
         //设置扫描结束
         sharePreferenceUtils.setScanFlag(false);
         //发送吐司
-        showToastForHandler(handler,"扫描结束");
+        showToastForHandler(handler, "扫描结束");
 
         //更新播放列表
         handler.post(runnable);
@@ -288,16 +263,15 @@ public class MainActivity extends AppCompatActivity
                 showToastForHandler(handler, "正在加载歌曲列表");
 
                 playList.addToList(DataSupport.findAll(SongInfo.class), 0);
-                showToastForHandler(handler, "加载完成");
-                Log.i("Simple", "加载完成");
-                Log.i("Simple", playList.getListsize()+"");
+                showToastForHandler(handler, "加载" + playList.getListsize()+"首歌");
+                Log.i("Simple", "加载"+playList.getListsize()+"首歌");
 
             }
         }
     };
 
     //通过handler发送Toast
-    public void showToastForHandler(Handler handler,String msg) {
+    public void showToastForHandler(Handler handler, String msg) {
         Message message = handler.obtainMessage();
         Bundle bundle = new Bundle();
         bundle.putString("message", msg);

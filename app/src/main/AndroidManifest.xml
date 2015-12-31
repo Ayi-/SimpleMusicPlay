@@ -22,8 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PlayerActivity" >
-        </activity>
 
         <activity android:name="com.ae.simplemusicplay.activity.PlayMusic" />
 <service android:name=".services.MusicPlayService"/>
