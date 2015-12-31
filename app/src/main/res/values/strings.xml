@@ -4,5 +4,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="nav_native_music">本地音乐</string>
     <string name="action_settings">Settings</string>
+    <string name="ic_title_settings">设置</string>
+    <string name="ic_menu_sleeptime">睡眠定时</string>
+    <string name="ic_menu_setting">软件设置</string>
+    ic_menu_exit
+    <string name="ic_menu_exit">退出</string>
 </resources>
