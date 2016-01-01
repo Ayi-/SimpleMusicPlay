@@ -261,7 +261,6 @@ public class MainActivity extends AppCompatActivity
 
             if (!sharePreferenceUtils.getScanFlag()) {
                 showToastForHandler(handler, "正在加载歌曲列表");
-
                 playList.addToList(DataSupport.findAll(SongInfo.class), 0);
                 showToastForHandler(handler, "加载" + playList.getListsize()+"首歌");
                 Log.i("Simple", "加载"+playList.getListsize()+"首歌");
