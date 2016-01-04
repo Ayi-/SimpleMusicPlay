@@ -1,10 +1,7 @@
 package com.ae.simplemusicplay.activity;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -20,7 +17,7 @@ import com.ae.simplemusicplay.services.MusicPlayService;
 import com.ae.simplemusicplay.widgets.CircleImageView;
 import com.ae.simplemusicplay.widgets.CircularSeekBar;
 
-import java.util.List;
+import static com.ae.simplemusicplay.Util.StartService.startservice;
 
 public class PlayMusic extends Activity implements View.OnClickListener {
 
@@ -30,11 +27,11 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     private TextView tv_singer;
 
     //播放按钮
-    private ImageButton imgbtn_play;
+    private ImageButton imgbtn_play_play;
     //上一首
-    private ImageButton previous;
+    private ImageButton imgbtn_previous_play;
     //下一首
-    private ImageButton next;
+    private ImageButton imgbtn_next_play;
 
     //设置binder，用来和服务通信
     private MusicPlayService.PlayBinder myBinder;
@@ -55,7 +52,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
             //开始播放
             tv_name.setText(playList.getCurrentSong().getSongName());
             tv_singer.setText(playList.getCurrentSong().getArtistName());
-            imgbtn_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+            imgbtn_play_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
             myBinder.play();
         }
     };
@@ -70,9 +67,6 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         seekBar.setMax(100);
         seekBar.setProgress(25);
 
-        Log.i("playactivity2", "create 1");
-        Log.i("playactivity2", "create 2");
-
         //获取播放列表
         playList = PlayList.getInstance(this);
 
@@ -80,12 +74,12 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
         tv_name = (TextView) findViewById(R.id.tv_name);
         tv_singer = (TextView) findViewById(R.id.tv_singer);
-        imgbtn_play = (ImageButton) findViewById(R.id.imgbtn_play);
-        previous = (ImageButton) findViewById(R.id.previous);
-        next = (ImageButton) findViewById(R.id.next);
-        imgbtn_play.setOnClickListener(this);
-        previous.setOnClickListener(this);
-        next.setOnClickListener(this);
+        imgbtn_play_play = (ImageButton) findViewById(R.id.imgbtn_play_play);
+        imgbtn_previous_play = (ImageButton) findViewById(R.id.imgbtn_previous_play);
+        imgbtn_next_play = (ImageButton) findViewById(R.id.imgbtn_next_play);
+        imgbtn_play_play.setOnClickListener(this);
+        imgbtn_previous_play.setOnClickListener(this);
+        imgbtn_next_play.setOnClickListener(this);
         //启动服务
         Log.i("playactivity2", "init setvice");
 
@@ -97,13 +91,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         //先检查服务是否已经先启动，然后再启动服务
         Log.i("initservice", MusicPlayService.class.getName());
 
-        if (!isWorked(MusicPlayService.class.getName())) {
-            Log.i("initservice", "start service");
-            Intent startIntent = new Intent(getApplicationContext(), MusicPlayService.class);
-            //设置服务不自动重新启动
-            startIntent.setFlags(Service.START_NOT_STICKY);
-            startService(startIntent);
-        }
+        startservice(getApplicationContext());
+        MainActivity.startserviceFlag = true;
         Log.i("initservice", "bindService");
 
         Intent bindIntent = new Intent(getApplicationContext(), MusicPlayService.class);
@@ -111,39 +100,33 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         bindService(bindIntent, connection, 0);
     }
 
-    //查询所有服务，检查服务是否已经启动
-    boolean isWorked(String className) {
-        ActivityManager manager = (ActivityManager) getApplicationContext()
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        boolean res = false;
-        List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(50);
-        if (services.size() <= 0) {
-            res = false;
-        }
-        for (int i = 0; i < services.size(); i++) {
-            if (services.get(i).service.getClassName().equals(className)) {
-                res = true;
-                break;
-            }
-        }
-        return res;
-    }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.imgbtn_play:
+            //播放与暂停
+            case R.id.imgbtn_play_play:
                 if (playList.isPlaying()) {
                     myBinder.pause();
-                    imgbtn_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+                    imgbtn_play_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
 
                 } else {
                     myBinder.continueplay();
                     tv_name.setText(playList.getCurrentSong().getSongName());
                     tv_singer.setText(playList.getCurrentSong().getArtistName());
-                    imgbtn_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
-
+                    imgbtn_play_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
                 }
+                break;
+            //下一首
+            case R.id.imgbtn_next_play:
+                myBinder.next();
+                imgbtn_play_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+                break;
+            //上一首
+            case R.id.imgbtn_previous_play:
+                myBinder.previous();
+                imgbtn_play_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+                break;
         }
     }
 

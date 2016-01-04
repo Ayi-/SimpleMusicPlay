@@ -19,7 +19,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.ae.simplemusicplay.PlayList;
@@ -27,14 +26,16 @@ import com.ae.simplemusicplay.R;
 import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
+import com.ae.simplemusicplay.services.MusicPlayService;
 
 import org.litepal.crud.DataSupport;
 
+import static com.ae.simplemusicplay.Util.StartService.startservice;
 import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+    public static boolean startserviceFlag = false;
     //歌曲列表
     private PlayList playList;
     //设置参数
@@ -42,10 +43,12 @@ public class MainActivity extends AppCompatActivity
     //两次返回退出计时用
     long[] mHits = new long[2];
 
-    private Button btn_play;
-    private Button btn_updatelist;
-
     private Handler handler;
+    //按钮
+    ImageButton imageIcon;
+    ImageButton imgbtn_previous_List;
+    ImageButton imgbtn_play_List;
+    ImageButton imgbtn_next_List;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,12 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //添加按钮
+        imageIcon = (ImageButton) findViewById(R.id.image_icon);
+        imgbtn_previous_List = (ImageButton) findViewById(R.id.imgbtn_previous_List);
+        imgbtn_play_List = (ImageButton) findViewById(R.id.imgbtn_play_List);
+        imgbtn_next_List = (ImageButton) findViewById(R.id.imgbtn_next_List);
+
         //处理UI Toast
         handler = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -74,6 +83,8 @@ public class MainActivity extends AppCompatActivity
                 showToast(getApplicationContext(), message);
             }
         };
+
+        //初始化sharePreference
         sharePreferenceUtils = SharePreferenceUtils.getInstance(getApplicationContext());
         //是否第一次使用本APP（进行歌曲扫描）
         Log.i("Simple", "scan");
@@ -85,33 +96,15 @@ public class MainActivity extends AppCompatActivity
                     sharePreferenceUtils.setNotFirst();
                 }
             }).start();
-
-
         }
         Log.i("Simple", "load");
         playList = PlayList.getInstance(this);
 
-        //图片打开播放器
-        ImageButton imageIcon = (ImageButton) findViewById(R.id.image_icon);
-        imageIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (playList.getListsize() <= 0) {
-                    //更新播放列表
-                    //showToast(MainActivity.this,"并没有音乐");
-                    handler.post(runnable);
-                }
-                if (playList.getListsize() > 0) {
-
-                    Intent intent = new Intent();
-                    intent.setClass(MainActivity.this, PlayMusic.class);
-                    startActivity(intent);
-                }
-            }
-        });
-
-
-
+        //按钮事件注册
+        imageIcon.setOnClickListener(this);
+        imgbtn_previous_List.setOnClickListener(this);
+        imgbtn_play_List.setOnClickListener(this);
+        imgbtn_next_List.setOnClickListener(this);
     }
 
     //按返回键关掉菜单
@@ -193,6 +186,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //获取歌曲信息
+
     public void searchSongs() {
         showToastForHandler(handler, "正在扫描歌曲");
         sharePreferenceUtils.setScanFlag(true);
@@ -262,8 +256,8 @@ public class MainActivity extends AppCompatActivity
             if (!sharePreferenceUtils.getScanFlag()) {
                 showToastForHandler(handler, "正在加载歌曲列表");
                 playList.addToList(DataSupport.findAll(SongInfo.class), 0);
-                showToastForHandler(handler, "加载" + playList.getListsize()+"首歌");
-                Log.i("Simple", "加载"+playList.getListsize()+"首歌");
+                showToastForHandler(handler, "加载" + playList.getListsize() + "首歌");
+                Log.i("Simple", "加载" + playList.getListsize() + "首歌");
 
             }
         }
@@ -276,5 +270,69 @@ public class MainActivity extends AppCompatActivity
         bundle.putString("message", msg);
         message.setData(bundle);
         handler.sendMessage(message);
+    }
+
+    @Override
+    protected void onResume() {
+        //切换播放按钮图标
+        if (playList.isPlaying()) {
+            imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+        } else {
+            imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intentOp = new Intent();
+        intentOp.setAction(MusicPlayService.BROADCAST_BTN);
+        if (!startserviceFlag) {
+            startservice(getApplicationContext());
+            startserviceFlag = true;
+        }
+        //通过广播形式发送操作
+        switch (v.getId()) {
+            //播放与暂停
+            case R.id.imgbtn_play_List:
+                //发送广播
+
+                if (playList.isPlaying()) {
+                    intentOp.putExtra("op", MusicPlayService.OP_PAUSE);
+                    imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+
+                } else {
+                    intentOp.putExtra("op", MusicPlayService.OP_CONTINUE);
+                    imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+                }
+                sendBroadcast(intentOp);
+                break;
+            //上一首
+            case R.id.imgbtn_previous_List:
+                intentOp.putExtra("op", MusicPlayService.OP_PREVIOUS);
+                imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+
+                sendBroadcast(intentOp);
+                break;
+            //下一首
+            case R.id.imgbtn_next_List:
+                intentOp.putExtra("op", MusicPlayService.OP_NEXT);
+                imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+
+                sendBroadcast(intentOp);
+                break;
+            case R.id.image_icon:
+                if (playList.getListsize() <= 0) {
+                    //更新播放列表
+                    //showToast(MainActivity.this,"并没有音乐");
+                    handler.post(runnable);
+                }
+                if (playList.getListsize() > 0) {
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, PlayMusic.class);
+                    startActivity(intent);
+                }
+                break;
+        }
     }
 }

@@ -125,7 +125,7 @@
             android:src="@mipmap/ic_repeat_grey600_48dp" />
 
         <ImageButton
-            android:id="@+id/previous"
+            android:id="@+id/imgbtn_previous_play"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_centerVertical="true"
@@ -135,7 +135,7 @@
             android:src="@mipmap/ic_skip_previous_black_48dp" />
 
         <ImageButton
-            android:id="@+id/imgbtn_play"
+            android:id="@+id/imgbtn_play_play"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerInParent="true"
@@ -146,7 +146,7 @@
 
 
         <ImageButton
-            android:id="@+id/next"
+            android:id="@+id/imgbtn_next_play"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:scaleType="fitXY"
