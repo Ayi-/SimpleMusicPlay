@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ae.simplemusicplay.PlayList;
@@ -32,7 +34,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     private ImageButton imgbtn_previous_play;
     //下一首
     private ImageButton imgbtn_next_play;
-
+    //歌词容器
+    private FrameLayout lyricLayout;
+    //中间圆形图片及拖动条容器
+    private RelativeLayout circleImageLayout;
     //设置binder，用来和服务通信
     private MusicPlayService.PlayBinder myBinder;
     //歌曲列表
@@ -61,6 +66,38 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+        //歌词容器
+        lyricLayout = (FrameLayout) findViewById(R.id.lyric_layout);
+        //中间圆形图片及拖动条容器
+        circleImageLayout = (RelativeLayout)findViewById(R.id.circle_image_layout);
+        //中间圆形图片设置点击事件：显示歌词
+        CircleImageView circleImage = (CircleImageView) findViewById(R.id.album_art);
+        circleImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (lyricLayout.getVisibility() == View.VISIBLE) {
+                    lyricLayout.setVisibility(View.INVISIBLE);
+                    circleImageLayout.setVisibility(View.VISIBLE);
+                } else {
+                    lyricLayout.setVisibility(View.VISIBLE);
+                    circleImageLayout.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        lyricLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (lyricLayout.getVisibility() == View.VISIBLE) {
+                    lyricLayout.setVisibility(View.INVISIBLE);
+                    circleImageLayout.setVisibility(View.VISIBLE);
+                } else {
+                    lyricLayout.setVisibility(View.VISIBLE);
+                    circleImageLayout.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+
         CircleImageView image = (CircleImageView) findViewById(R.id.album_art);
         CircularSeekBar seekBar = (CircularSeekBar) findViewById(R.id.song_progress_circular);
         image.setImageResource(R.mipmap.test_icon);

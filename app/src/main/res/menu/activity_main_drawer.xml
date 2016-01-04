@@ -6,6 +6,14 @@
             android:id="@+id/nav_native_music"
             android:icon="@mipmap/ic_queue_music_grey600_48dp"
             android:title="@string/nav_native_music" />
+        <item
+            android:id="@+id/nav_internet_music"
+            android:icon="@mipmap/ic_track_changes_grey600_48dp"
+            android:title="@string/nav_internet_music" />
+        <item
+            android:id="@+id/nav_search_music"
+            android:icon="@mipmap/ic_search_grey600_48dp"
+            android:title="@string/nav_search_music" />
     </group>
 
     <item android:title="@string/ic_title_settings">

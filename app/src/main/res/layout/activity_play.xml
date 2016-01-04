@@ -48,6 +48,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/circle_image_layout"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_centerInParent="true"
@@ -94,17 +95,17 @@
         android:id="@+id/lyric_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="78dp"
         android:layout_marginBottom="75dp"
         android:clickable="true"
         android:background="#60000000"
         android:visibility="invisible">
 
-<!--        <com.chenjiayao.musicplayer.widgets.LrcView
+        <com.ae.simplemusicplay.widgets.LrcView
             android:id="@+id/lrc_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text=" " />-->
+            android:text="歌词加载中" />
     </FrameLayout>
 
     <RelativeLayout
