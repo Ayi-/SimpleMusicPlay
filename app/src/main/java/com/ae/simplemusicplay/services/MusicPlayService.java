@@ -17,11 +17,13 @@ import com.ae.simplemusicplay.model.SongInfo;
 
 import java.io.IOException;
 
+import static com.ae.simplemusicplay.Util.NotifyUtil.showButtonNotify;
+
 
 /**
  * Created by dell on 2015/12/29.
  */
-public class MusicPlayService extends Service /*implements IMusicService*/ {
+public class MusicPlayService extends Service implements MediaPlayer.OnCompletionListener /*implements IMusicService*/ {
     private MediaPlayer mediaPlayer;       //媒体播放器对象
 
     //广播的action
@@ -78,9 +80,9 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
     public void playMusic(SongInfo song) {
 
         //如果正在播放音乐
-//        if (mediaPlayer != null) {
-//            mediaPlayer.reset();
-//        }
+        if (mediaPlayer != null) {
+            mediaPlayer.reset();
+        }
         //修改为新的播放资源
         try {
             Log.i("playMusic", "playMusic");
@@ -98,6 +100,7 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
         /**
          * 通知设置
          */
+        showButtonNotify(getApplicationContext(),playList.isPlaying(),song.getSongName(),song.getArtistName());
     }
 
     /**
@@ -148,6 +151,13 @@ public class MusicPlayService extends Service /*implements IMusicService*/ {
             mediaPlayer.start();
             playList.setIsPlaying(true);
         }
+    }
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        playNext();
+        Intent intent = new Intent();
+        intent.setAction("com.chenjiayao.musicplayer.next");
+        sendBroadcast(intent);
     }
 
     @Nullable

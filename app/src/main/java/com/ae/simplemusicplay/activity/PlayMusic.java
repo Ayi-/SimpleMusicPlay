@@ -132,8 +132,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
-
         unbindService(connection);
         super.onDestroy();
     }
+
 }
