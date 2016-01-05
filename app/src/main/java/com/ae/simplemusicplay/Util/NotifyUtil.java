@@ -24,14 +24,19 @@ public class NotifyUtil {
     public static NotificationManager mNotificationManager;
 
     public static void showButtonNotify(Context context, boolean playFlag,String name,String singer) {
+/*
+        //大视图
+        android.support.v4.app.NotificationCompat.InboxStyle inboxStyle = new android.support.v4.app.NotificationCompat.InboxStyle();
+*/
 
         mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+
         RemoteViews mRemoteViews = new RemoteViews(context.getPackageName(), R.layout.view_custom_button);
         mRemoteViews.setImageViewResource(R.id.custom_song_icon, R.mipmap.ic_launcher);
         //API3.0 以上的时候显示按钮，否则消失
-        mRemoteViews.setTextViewText(R.id.tv_custom_song_singer, singer);
+        //mRemoteViews.setTextViewText(R.id.tv_custom_song_singer, singer);
         mRemoteViews.setTextViewText(R.id.tv_custom_song_name, name);
         //如果版本号低于（3。0），那么不显示按钮
         if (getSystemVersion() <= 9) {
@@ -42,9 +47,11 @@ public class NotifyUtil {
             if (playFlag) {
                 mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_pause_circle_outline_grey600_48dp);
             } else {
-                mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_play_circle_outline_grey600_48dp);
             }
         }
+        mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_play_circle_outline_grey600_48dp);
+
+
 /**
  //广播的action
  public static final String BROADCAST_BTN = "com.ae.simplemusicplay.services.btn";
