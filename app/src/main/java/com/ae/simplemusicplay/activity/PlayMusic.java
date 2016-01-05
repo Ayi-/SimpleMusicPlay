@@ -43,7 +43,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     //歌曲列表
     private PlayList playList;
     //临时使用Binder连接
+
+
     private ServiceConnection connection = new ServiceConnection() {
+
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -120,6 +123,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         //启动服务
         Log.i("playactivity2", "init setvice");
 
+
+
         initServiceBinder();
     }
 
@@ -135,6 +140,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         Intent bindIntent = new Intent(getApplicationContext(), MusicPlayService.class);
         //BIND_AUTO_CREATE会自动创建服务（如果服务并没有start）,这里设置0（不会自动start服务）
         bindService(bindIntent, connection, 0);
+
+
     }
 
 
@@ -169,8 +176,11 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
+        if(connection!=null)
         unbindService(connection);
         super.onDestroy();
     }
+
+
 
 }

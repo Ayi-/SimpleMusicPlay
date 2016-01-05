@@ -53,7 +53,7 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/tv_custom_song_singer"
+            android:id="@+id/tv_custom_song_name"
             style="@style/NotificationTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/tv_custom_song_name"
+            android:id="@+id/tv_custom_song_singer"
             style="@style/NotificationContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -13,6 +13,9 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -21,12 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.ae.simplemusicplay.Myadapter.SongListAdapter;
 import com.ae.simplemusicplay.PlayList;
 import com.ae.simplemusicplay.R;
 import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
+import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
-import com.ae.simplemusicplay.services.MusicPlayService;
 
 import org.litepal.crud.DataSupport;
 
@@ -34,7 +38,8 @@ import static com.ae.simplemusicplay.Util.StartService.startservice;
 import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, SongListAdapter.ClickListener {
+
     public static boolean startserviceFlag = false;
     //歌曲列表
     private PlayList playList;
@@ -43,12 +48,19 @@ public class MainActivity extends AppCompatActivity
     //两次返回退出计时用
     long[] mHits = new long[2];
 
+    //按两次同一首歌就切换到播放界面,通过前后点击位置来判断
+    private int firstPositionClick=-1;
+
     private Handler handler;
     //按钮
     ImageButton imageIcon;
     ImageButton imgbtn_previous_List;
     ImageButton imgbtn_play_List;
     ImageButton imgbtn_next_List;
+    //列表
+    private RecyclerView mRecyclerView;
+    private LinearLayoutManager linearLayoutManager;
+    private SongListAdapter songListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +81,22 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //初始化list实例
+        playList = PlayList.getInstance(this);
+
         //添加按钮
         imageIcon = (ImageButton) findViewById(R.id.image_icon);
         imgbtn_previous_List = (ImageButton) findViewById(R.id.imgbtn_previous_List);
         imgbtn_play_List = (ImageButton) findViewById(R.id.imgbtn_play_List);
         imgbtn_next_List = (ImageButton) findViewById(R.id.imgbtn_next_List);
+
+        //初始化recycleview
+        mRecyclerView = (RecyclerView) findViewById(R.id.music_list);
+        //这里用线性显示 类似于listview
+        linearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        //如果每个item的大小都是固定的,加这个能加速运行
+        mRecyclerView.setHasFixedSize(true);
 
         //处理UI Toast
         handler = new Handler() {
@@ -97,14 +120,26 @@ public class MainActivity extends AppCompatActivity
                 }
             }).start();
         }
+
         Log.i("Simple", "load");
-        playList = PlayList.getInstance(this);
+
+        //更新播放列表
+        if (playList.getListsize() <= 0)
+            handler.post(runnable);
 
         //按钮事件注册
         imageIcon.setOnClickListener(this);
         imgbtn_previous_List.setOnClickListener(this);
         imgbtn_play_List.setOnClickListener(this);
         imgbtn_next_List.setOnClickListener(this);
+
+        //歌曲填充
+        songListAdapter = new SongListAdapter(this, playList.songInfos);
+        songListAdapter.setOnItemClickListener(this);
+
+        //歌曲列表填充
+        mRecyclerView.setAdapter(songListAdapter);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
     //按返回键关掉菜单
@@ -165,20 +200,21 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-//
-//        if (id == R.id.nav_camara) {
-//            // Handle the camera action
-//        } else if (id == R.id.nav_gallery) {
-//
-//        } else if (id == R.id.nav_slideshow) {
-//
-//        } else if (id == R.id.nav_manage) {
-//
-//        } else if (id == R.id.nav_share) {
-//
-//        } else if (id == R.id.nav_send) {
-//
-//        }
+        if (id == R.id.nav_native_music) {
+
+        } else if (id == R.id.nav_sleeptime) {
+
+        } else if (id == R.id.nav_setting) {
+
+        } else if (id == R.id.nav_exit) {
+            //退出应用
+            Log.i("ae", id + "   " + R.id.nav_exit);
+            Intent intentExit = new Intent();
+            intentExit.setAction(OpUtil.BROADCAST_EXIT);
+            sendBroadcast(intentExit);
+                        Log.i("ae", "send exit!");
+            finish();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -285,12 +321,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        Intent intentOp = new Intent();
-        intentOp.setAction(MusicPlayService.BROADCAST_BTN);
-        if (!startserviceFlag) {
-            startservice(getApplicationContext());
-            startserviceFlag = true;
-        }
+        Intent intentOp = getOPIntent();
         //通过广播形式发送操作
         switch (v.getId()) {
             //播放与暂停
@@ -298,41 +329,75 @@ public class MainActivity extends AppCompatActivity
                 //发送广播
 
                 if (playList.isPlaying()) {
-                    intentOp.putExtra("op", MusicPlayService.OP_PAUSE);
+                    intentOp.putExtra("op", OpUtil.OP_PAUSE);
                     imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
 
                 } else {
-                    intentOp.putExtra("op", MusicPlayService.OP_CONTINUE);
+                    intentOp.putExtra("op", OpUtil.OP_CONTINUE);
                     imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
                 }
                 sendBroadcast(intentOp);
                 break;
             //上一首
             case R.id.imgbtn_previous_List:
-                intentOp.putExtra("op", MusicPlayService.OP_PREVIOUS);
+                intentOp.putExtra("op", OpUtil.OP_PREVIOUS);
                 imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
 
                 sendBroadcast(intentOp);
                 break;
             //下一首
             case R.id.imgbtn_next_List:
-                intentOp.putExtra("op", MusicPlayService.OP_NEXT);
+                intentOp.putExtra("op", OpUtil.OP_NEXT);
                 imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
 
                 sendBroadcast(intentOp);
                 break;
             case R.id.image_icon:
-                if (playList.getListsize() <= 0) {
-                    //更新播放列表
-                    //showToast(MainActivity.this,"并没有音乐");
-                    handler.post(runnable);
-                }
                 if (playList.getListsize() > 0) {
-                    Intent intent = new Intent();
-                    intent.setClass(MainActivity.this, PlayMusic.class);
-                    startActivity(intent);
+                    //切换到播放界面
+                   startPlayMusicActivity();
                 }
                 break;
         }
+    }
+
+    //设置recycleview item的点击事件
+    @Override
+    public void onItemClick(int position, View v) {
+        Log.i("item", "onItemClick position: " + position);
+        playList.setCurrent(position);
+        //判断是否同一首歌按了两次
+        if(firstPositionClick!=position)
+        {
+            firstPositionClick=position;
+        }
+        else
+        {
+            firstPositionClick=-1;
+            startPlayMusicActivity();
+        }
+        Intent intentOp = getOPIntent();
+        intentOp.putExtra("op", OpUtil.OP_PLAY);
+        imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+
+        sendBroadcast(intentOp);
+    }
+
+    //获取操作音乐播放的intent,用来发送广播
+    public Intent getOPIntent() {
+        Intent intentOp = new Intent();
+        intentOp.setAction(OpUtil.BROADCAST_BTN);
+        if (!startserviceFlag) {
+            startservice(getApplicationContext());
+            startserviceFlag = true;
+        }
+        return intentOp;
+    }
+
+    //切换到播放界面
+    public void startPlayMusicActivity() {
+        Intent intent = new Intent(MainActivity.this, PlayMusic.class);
+
+        startActivity(intent);
     }
 }

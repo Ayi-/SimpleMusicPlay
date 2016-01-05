@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.ae.simplemusicplay.R;
-import com.ae.simplemusicplay.services.MusicPlayService;
+import com.ae.simplemusicplay.activity.PlayMusic;
 
 /**
  * Created by AE on 2016/1/4.
@@ -57,23 +57,23 @@ public class NotifyUtil {
  public static final int OP_PREVIOUS = 0x05;
  **/
         //点击的事件处理
-        Intent buttonIntent = new Intent(MusicPlayService.BROADCAST_BTN);
+        Intent buttonIntent = new Intent(OpUtil.BROADCAST_BTN);
         /* 上一首按钮 */
-        buttonIntent.putExtra("op", MusicPlayService.OP_PREVIOUS);
+        buttonIntent.putExtra("op", OpUtil.OP_PREVIOUS);
         //这里加了广播，所及INTENT的必须用getBroadcast方法
         PendingIntent intent_prev = PendingIntent.getBroadcast(context, 1, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_prev, intent_prev);
 		/* 播放/暂停  按钮 */
-        buttonIntent.putExtra("op", MusicPlayService.OP_PLAY);
+        buttonIntent.putExtra("op", OpUtil.OP_PLAY);
         PendingIntent intent_paly = PendingIntent.getBroadcast(context, 2, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_play, intent_paly);
 		/* 下一首 按钮  */
-        buttonIntent.putExtra("op", MusicPlayService.OP_NEXT);
+        buttonIntent.putExtra("op", OpUtil.OP_NEXT);
         PendingIntent intent_next = PendingIntent.getBroadcast(context, 3, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_next, intent_next);
 
         mBuilder.setContent(mRemoteViews)
-                .setContentIntent(getDefalutIntent(context, Notification.FLAG_ONGOING_EVENT))
+                .setContentIntent(getDefalutIntent(context))
                 .setWhen(System.currentTimeMillis())// 通知产生的时间，会在通知信息里显示
                 .setTicker("正在播放")
                 .setPriority(Notification.PRIORITY_DEFAULT)// 设置该通知优先级
@@ -117,7 +117,7 @@ public class NotifyUtil {
     /**
      * 清除当前创建的通知栏
      */
-    public void clearNotify(int notifyId) {
+    public static void clearNotify(int notifyId) {
 
         mNotificationManager.cancel(notifyId);//删除一个特定的通知ID对应的通知
 //		mNotification.cancel(getResources().getString(R.string.app_name));
@@ -129,8 +129,10 @@ public class NotifyUtil {
      * @flags属性: 在顶部常驻:Notification.FLAG_ONGOING_EVENT
      * 点击去除： Notification.FLAG_AUTO_CANCEL
      */
-    public static PendingIntent getDefalutIntent(Context context, int flags) {
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, new Intent(), flags);
+    public static PendingIntent getDefalutIntent(Context context) {
+        Intent intent = new Intent(context, PlayMusic.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1,intent , PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
 }

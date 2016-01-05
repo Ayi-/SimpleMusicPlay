@@ -13,6 +13,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.ae.simplemusicplay.PlayList;
+import com.ae.simplemusicplay.Util.NotifyUtil;
+import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.model.SongInfo;
 
 import java.io.IOException;
@@ -26,21 +28,19 @@ import static com.ae.simplemusicplay.Util.NotifyUtil.showButtonNotify;
 public class MusicPlayService extends Service implements MediaPlayer.OnCompletionListener /*implements IMusicService*/ {
     private MediaPlayer mediaPlayer;       //媒体播放器对象
 
-    //广播的action
-    public static final String BROADCAST_BTN = "com.ae.simplemusicplay.services.btn";
 
-    //按钮
-    public static final int OP_PLAY = 0x01;
-    public static final int OP_PAUSE = 0x02;
-    public static final int OP_CONTINUE = 0x03;
-    public static final int OP_NEXT = 0x04;
-    public static final int OP_PREVIOUS = 0x05;
 
     private PlayBinder mybinder = new PlayBinder();
     //歌曲列表
     private PlayList playList;
+
     //定义一个广播，用来按钮操作
     private MyBroadCast receiver;
+    //定义一个广播，用来执行退出
+    private ExitBroadCast receiverExit;
+
+    //歌曲id
+    private int songid = -1;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -58,13 +58,22 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
         Log.i("service", "create service");
 
         /**
-         * 注册广播
+         * 注册按钮操作广播
          */
-        receiver= new MyBroadCast();
+        receiver = new MyBroadCast();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(MusicPlayService.BROADCAST_BTN);
+        filter.addAction(OpUtil.BROADCAST_BTN);
         registerReceiver(receiver, filter);
+        /**
+         * 注册退出事件广播
+         */
+                Log.i("initservice", "startBroadCast");
 
+        receiverExit = new ExitBroadCast();
+        IntentFilter filterExit = new IntentFilter();
+        filterExit.addAction(OpUtil.BROADCAST_EXIT);
+        registerReceiver(receiverExit, filterExit);
+        Log.i("initservice", "init ok!");
         super.onCreate();
     }
 
@@ -78,29 +87,31 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
      * 播放音乐
      */
     public void playMusic(SongInfo song) {
+        //检测当前播放歌曲的id与正要播放的歌的id是否一致，一致就不进行操作
+        if (song.getId() != songid||!mediaPlayer.isPlaying()) {
+            songid = song.getId();
+            //如果正在播放音乐
+            if (mediaPlayer != null) {
+                mediaPlayer.reset();
+            }
+            //修改为新的播放资源
+            try {
+                Log.i("playMusic", "playMusic");
+                mediaPlayer.setDataSource(song.getPath());
+                //必须在prepare()之前调用这个
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                playList.setIsPlaying(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        //如果正在播放音乐
-        if (mediaPlayer != null) {
-            mediaPlayer.reset();
+            /**
+             * 通知设置
+             */
+            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
         }
-        //修改为新的播放资源
-        try {
-            Log.i("playMusic", "playMusic");
-            mediaPlayer.setDataSource(song.getPath());
-            //必须在prepare()之前调用这个
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            playList.setIsPlaying(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        /**
-         * 通知设置
-         */
-        showButtonNotify(getApplicationContext(),playList.isPlaying(),song.getSongName(),song.getArtistName());
     }
 
     /**
@@ -152,6 +163,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             playList.setIsPlaying(true);
         }
     }
+
     @Override
     public void onCompletion(MediaPlayer mp) {
         playNext();
@@ -207,19 +219,19 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
 
             int op = intent.getIntExtra("op", -1);
             switch (op) {
-                case OP_PLAY:
+                case OpUtil.OP_PLAY:
                     playMusic(playList.getCurrentSong());
                     break;
-                case OP_PAUSE:
+                case OpUtil.OP_PAUSE:
                     pauseMusic();
                     break;
-                case OP_CONTINUE:
+                case OpUtil.OP_CONTINUE:
                     continuePlay();
                     break;
-                case OP_NEXT:
+                case OpUtil.OP_NEXT:
                     playNext();
                     break;
-                case OP_PREVIOUS:
+                case OpUtil.OP_PREVIOUS:
                     playPrevious();
                     break;
 
@@ -227,5 +239,24 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
         }
     }
 
+        //广播 用来接收退出
+    public class ExitBroadCast extends BroadcastReceiver {
 
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("exit","get");
+                //关闭服务
+                stopMusic();
+                Intent stopIntent = new Intent(getApplicationContext(), MusicPlayService.class);
+                stopService(stopIntent);
+
+                //注销广播
+                if(receiverExit!=null) {
+                    unregisterReceiver(receiverExit);
+                }
+                if(receiver!=null)
+                    unregisterReceiver(receiver);
+                NotifyUtil.clearNotify(200);
+        }
+    }
 }

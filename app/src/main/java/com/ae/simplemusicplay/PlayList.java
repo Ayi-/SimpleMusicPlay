@@ -58,6 +58,10 @@ public class PlayList {
     public void setCurrentPos(int currentPos) {
         this.currentPos = currentPos;
     }
+    //设置当前播放歌曲
+    public void setCurrent(int current) {
+        this.current = current;
+    }
 
     public void addToList(List<SongInfo> infos, int pos) {
         clearList();
