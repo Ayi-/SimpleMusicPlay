@@ -31,9 +31,7 @@ import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
 import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
-
 import org.litepal.crud.DataSupport;
-
 import static com.ae.simplemusicplay.Util.StartService.startservice;
 import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
 
@@ -142,7 +140,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    //按返回键关掉菜单
+   //按返回键关掉菜单
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -152,7 +150,7 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
+/*
     //两次返回退出APP
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -168,7 +166,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return true;
-    }
+    }*/
 
     //OptionsMenu
     @Override

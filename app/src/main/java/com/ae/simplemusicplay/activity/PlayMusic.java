@@ -99,19 +99,14 @@ public class PlayMusic extends Activity implements View.OnClickListener {
                 }
             }
         });
-
-
         CircleImageView image = (CircleImageView) findViewById(R.id.album_art);
         CircularSeekBar seekBar = (CircularSeekBar) findViewById(R.id.song_progress_circular);
         image.setImageResource(R.mipmap.test_icon);
         seekBar.setMax(100);
         seekBar.setProgress(25);
-
         //获取播放列表
         playList = PlayList.getInstance(this);
-
         //获取文本框和按钮
-
         tv_name = (TextView) findViewById(R.id.tv_name);
         tv_singer = (TextView) findViewById(R.id.tv_singer);
         imgbtn_play_play = (ImageButton) findViewById(R.id.imgbtn_play_play);
@@ -122,9 +117,6 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         imgbtn_next_play.setOnClickListener(this);
         //启动服务
         Log.i("playactivity2", "init setvice");
-
-
-
         initServiceBinder();
     }
 
@@ -132,15 +124,12 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     public void initServiceBinder() {
         //先检查服务是否已经先启动，然后再启动服务
         Log.i("initservice", MusicPlayService.class.getName());
-
         startservice(getApplicationContext());
         MainActivity.startserviceFlag = true;
         Log.i("initservice", "bindService");
-
         Intent bindIntent = new Intent(getApplicationContext(), MusicPlayService.class);
         //BIND_AUTO_CREATE会自动创建服务（如果服务并没有start）,这里设置0（不会自动start服务）
         bindService(bindIntent, connection, 0);
-
 
     }
 
@@ -153,7 +142,6 @@ public class PlayMusic extends Activity implements View.OnClickListener {
                 if (playList.isPlaying()) {
                     myBinder.pause();
                     imgbtn_play_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
-
                 } else {
                     myBinder.continueplay();
                     tv_name.setText(playList.getCurrentSong().getSongName());

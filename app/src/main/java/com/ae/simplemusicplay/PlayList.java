@@ -1,6 +1,5 @@
 package com.ae.simplemusicplay;
 
-
 import android.content.Context;
 
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
@@ -15,7 +14,6 @@ import java.util.Random;
  * Modify:Ae
  */
 public class PlayList {
-
     public List<SongInfo> songInfos;
     int total;
     int current;
@@ -24,7 +22,6 @@ public class PlayList {
     SharePreferenceUtils sharePreferenceUtils;
     boolean isPlaying = true;
     int currentPos;
-
 
     public PlayList(Context context) {
         this.context = context;
@@ -58,6 +55,7 @@ public class PlayList {
     public void setCurrentPos(int currentPos) {
         this.currentPos = currentPos;
     }
+
     //设置当前播放歌曲
     public void setCurrent(int current) {
         this.current = current;
@@ -123,8 +121,7 @@ public class PlayList {
         return songInfos.get(current);
     }
 
-    public int getListsize()
-    {
+    public int getListsize() {
         return songInfos.size();
     }
 

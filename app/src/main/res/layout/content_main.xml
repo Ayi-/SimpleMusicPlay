@@ -4,25 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:alpha="87"
     android:background="@mipmap/mainlayoutbk"
     tools:context=".MainActivity"
-    tools:showIn="@layout/app_bar_main"
-    android:alpha="87"
-    >
+    tools:showIn="@layout/app_bar_main">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-         android:background="#DFFFFFFF">
+        android:background="#DFFFFFFF">
 
         <android.support.v7.widget.RecyclerView
-        android:id="@+id/music_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+            android:id="@+id/music_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="60dp">
 
         </android.support.v7.widget.RecyclerView>
+
         <LinearLayout
             android:id="@+id/main_player_layout"
             android:layout_width="match_parent"
@@ -52,7 +52,7 @@
                     android:layout_height="40dp"
                     android:background="#00000000"
                     android:scaleType="fitXY"
-                    android:src="@mipmap/ic_skip_previous_grey600_48dp" />
+                    android:src="@drawable/btn_pre" />
 
                 <ImageButton
                     android:id="@+id/imgbtn_play_List"
@@ -71,8 +71,7 @@
                     android:layout_marginLeft="25dp"
                     android:background="#00000000"
                     android:scaleType="fitXY"
-
-                    android:src="@mipmap/ic_skip_next_grey600_48dp" />
+                    android:src="@drawable/btn_next" />
             </LinearLayout>
         </LinearLayout>
 
