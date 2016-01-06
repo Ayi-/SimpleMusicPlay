@@ -20,7 +20,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:scaleType="center"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@mipmap/music5" />
 
         <LinearLayout
             android:layout_toRightOf="@id/image_view"

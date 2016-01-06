@@ -2,6 +2,7 @@ package com.ae.simplemusicplay.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -37,6 +38,9 @@ import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
 import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import org.litepal.crud.DataSupport;
 
@@ -68,6 +72,9 @@ public class MainActivity extends AppCompatActivity
     private SongListAdapter songListAdapter;
     //定义一个广播，用来修改UI界面
     private NameSingerBroadCast receiverNameSinger;
+
+    public static ImageLoader imageLoader = ImageLoader.getInstance();
+    public static DisplayImageOptions options;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +168,11 @@ public class MainActivity extends AppCompatActivity
         filterNameSinger.addAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
         registerReceiver(receiverNameSinger, filterNameSinger);
 
-
+        imageLoader.init(ImageLoaderConfiguration.createDefault(this));
+        options = new DisplayImageOptions.Builder()
+                .showImageForEmptyUri(R.mipmap.music5) // resource or drawable
+                .showImageOnFail(R.mipmap.music5)// resource or drawable
+                .build();
     }
 
     //按返回键关掉菜单
@@ -451,6 +462,10 @@ public class MainActivity extends AppCompatActivity
                 imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
             else
                 imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+
+            Uri uri = ContentUris.withAppendedId(OpUtil.ARTISTURI, song.getAlbumId());
+                    MainActivity.imageLoader.displayImage(String.valueOf(uri), imageIcon, MainActivity.options);
+
         }
     }
 

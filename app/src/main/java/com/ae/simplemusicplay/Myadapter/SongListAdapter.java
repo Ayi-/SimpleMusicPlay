@@ -1,6 +1,8 @@
 package com.ae.simplemusicplay.Myadapter;
 
+import android.content.ContentUris;
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,24 +11,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ae.simplemusicplay.R;
-import com.ae.simplemusicplay.Util.ImageUtil;
+import com.ae.simplemusicplay.Util.OpUtil;
+import com.ae.simplemusicplay.activity.MainActivity;
 import com.ae.simplemusicplay.model.SongInfo;
 
 import java.util.List;
 
 
-public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ItemViewHolder> {
     private final LayoutInflater mLayoutInflater;
     private final Context mContext;
     List<SongInfo> messageList;
 
     private static ClickListener clickListener;
 
+
     //初始化
     public SongListAdapter(Context context, List<SongInfo> messageList) {
         this.mContext = context;
         this.messageList = messageList;
         this.mLayoutInflater = LayoutInflater.from(context);
+
     }
 
     //没什么用
@@ -37,7 +42,7 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     //创建新View，被LayoutManager所调用
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         return new ItemViewHolder(mLayoutInflater.inflate(R.layout.image_text_view, parent, false));
 
@@ -45,19 +50,25 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     //将数据与界面进行绑定的操作
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(ItemViewHolder holder, int position) {
+        SongInfo songInfo = messageList.get(position);
+
 
         //设置图片
         //((ItemViewHolder) holder).songImgView.setText(messageList.get(position).get);
         //设置歌名
-        ((ItemViewHolder) holder).nameTextView.setText(messageList.get(position).getSongName());
+        holder.nameTextView.setText(songInfo.getSongName());
         //设置歌手名
-        ((ItemViewHolder) holder).singerTextView.setText(messageList.get(position).getArtistName());
+        holder.singerTextView.setText(songInfo.getArtistName());
 
         //设置图片
-        ((ItemViewHolder) holder).songImgView.setImageBitmap(ImageUtil.getArtwork(mContext, messageList.get(position).getSongId(), messageList.get(position).getAlbumId(), true, true));
+        //((ItemViewHolder) holder).songImgView.setImageBitmap(ImageUtil.getArtwork(mContext, messageList.get(position).getSongId(), messageList.get(position).getAlbumId(), true, true));
         //设置音乐时长
-        ((ItemViewHolder) holder).durationTextView.setText(formatTime(messageList.get(position).getDuration()));
+        holder.durationTextView.setText(formatTime(songInfo.getDuration()));
+
+        Uri uri = ContentUris.withAppendedId(OpUtil.ARTISTURI, songInfo.getAlbumId());
+        MainActivity.imageLoader.displayImage(String.valueOf(uri), holder.songImgView, MainActivity.options);
+
 
     }
 

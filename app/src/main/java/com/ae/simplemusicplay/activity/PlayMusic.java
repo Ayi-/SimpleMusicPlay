@@ -3,10 +3,12 @@ package com.ae.simplemusicplay.activity;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -44,6 +46,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     //中间圆形图片及拖动条容器
     private RelativeLayout circleImageLayout;
     private CircularSeekBar seekBar;
+    private CircleImageView circleImage;
     //设置binder，用来和服务通信
     private MusicPlayService.PlayBinder myBinder;
     //歌曲列表
@@ -96,7 +99,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         //中间圆形图片及拖动条容器
         circleImageLayout = (RelativeLayout) findViewById(R.id.circle_image_layout);
         //中间圆形图片设置点击事件：显示歌词
-        CircleImageView circleImage = (CircleImageView) findViewById(R.id.album_art);
+        circleImage = (CircleImageView) findViewById(R.id.album_art);
         circleImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,8 +126,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         });
 
 
-        CircleImageView image = (CircleImageView) findViewById(R.id.album_art);
-        image.setImageResource(R.mipmap.test_icon);
+        //CircleImageView image = (CircleImageView) findViewById(R.id.album_art);
+        //image.setImageResource(R.mipmap.test_icon);
 
         //获取播放列表
         playList = PlayList.getInstance(this);
@@ -200,6 +203,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
                 imgbtn_play_play.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
             else
                 imgbtn_play_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+
+            Uri uri = ContentUris.withAppendedId(OpUtil.ARTISTURI, song.getAlbumId());
+                               MainActivity.imageLoader.displayImage(String.valueOf(uri),circleImage , MainActivity.options);
+
         }
     }
 
