@@ -47,9 +47,9 @@ public class NotifyUtil {
             if (playFlag) {
                 mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_pause_circle_outline_grey600_48dp);
             } else {
+                mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_play_circle_outline_grey600_48dp);
             }
         }
-        mRemoteViews.setImageViewResource(R.id.btn_custom_play, R.mipmap.ic_play_circle_outline_grey600_48dp);
 
 
 /**
@@ -71,7 +71,12 @@ public class NotifyUtil {
         PendingIntent intent_prev = PendingIntent.getBroadcast(context, 1, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_prev, intent_prev);
 		/* 播放/暂停  按钮 */
-        buttonIntent.putExtra("op", OpUtil.OP_PLAY);
+        if (playFlag){
+            buttonIntent.putExtra("op", OpUtil.OP_PAUSE);
+        }else {
+            buttonIntent.putExtra("op", OpUtil.OP_CONTINUE);
+        }
+        //buttonIntent.putExtra("op", OpUtil.OP_PLAY);
         PendingIntent intent_paly = PendingIntent.getBroadcast(context, 2, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_play, intent_paly);
 		/* 下一首 按钮  */
