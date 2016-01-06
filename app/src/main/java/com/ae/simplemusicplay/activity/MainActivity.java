@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.music_list);
         //这里用线性显示 类似于listview
         linearLayoutManager = new LinearLayoutManager(this);
+
         mRecyclerView.setLayoutManager(linearLayoutManager);
         //如果每个item的大小都是固定的,加这个能加速运行
         mRecyclerView.setHasFixedSize(true);
@@ -119,10 +120,8 @@ public class MainActivity extends AppCompatActivity
                 changeUI();
                 //启动服务
                 startservice(getApplicationContext());
-
             }
         };
-
 
         //是否第一次使用本APP（进行歌曲扫描）
         Log.i("Simple", "scan");
@@ -427,7 +426,6 @@ public class MainActivity extends AppCompatActivity
             //第二次进入播放界面
             startPlayMusicActivity();
         }
-
     }
 
     //获取操作音乐播放的intent,用来发送广播
