@@ -16,8 +16,9 @@ import java.util.List;
 public class StartService {
     public static Context mContext;
     public static void startservice(Context context){
-        mContext = context;
+mContext = context;
           if (!isWorked(MusicPlayService.class.getName())) {
+
             Log.i("initservice", "start service");
             Intent startIntent = new Intent(mContext.getApplicationContext(), MusicPlayService.class);
             //设置服务不自动重新启动

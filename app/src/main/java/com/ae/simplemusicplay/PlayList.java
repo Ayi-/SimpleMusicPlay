@@ -2,6 +2,7 @@ package com.ae.simplemusicplay;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
@@ -22,8 +23,11 @@ public class PlayList {
     Context context;
     public static PlayList lists;
     SharePreferenceUtils sharePreferenceUtils;
-    boolean isPlaying = true;
+    boolean isPlaying = false;
+    //当前歌曲进度
     int currentPos;
+
+
 
 
     public PlayList(Context context) {
@@ -62,6 +66,9 @@ public class PlayList {
     public void setCurrent(int current) {
         this.current = current;
     }
+    public int getCurrent() {
+        return this.current;
+    }
 
     public void addToList(List<SongInfo> infos, int pos) {
         clearList();
@@ -79,6 +86,7 @@ public class PlayList {
 
     public SongInfo getNext() {
         int mode = sharePreferenceUtils.getPlayMode();
+        Log.i("Mode",mode+"");
         switch (mode) {
             case 0:   //顺序播放
                 if (current == total - 1) {

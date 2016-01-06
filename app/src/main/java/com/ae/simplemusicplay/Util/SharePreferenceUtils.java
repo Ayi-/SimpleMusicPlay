@@ -32,6 +32,7 @@ public class SharePreferenceUtils {
         editor = preferences.edit();
     }
 
+    //应用是否第一次运行
     public boolean isFirstTimeUse() {
         boolean res = preferences.getBoolean("firstTime", true);
         return res;
@@ -54,6 +55,9 @@ public class SharePreferenceUtils {
     }
 
     //设置播放模式
+    //0顺序
+    //1随机
+    //2单曲
     public void setPlayMode(int mode) {
         editor.putInt("playMode", mode);
         editor.commit();
@@ -69,9 +73,30 @@ public class SharePreferenceUtils {
         editor.putBoolean("scanflag", flag);
         editor.commit();
     }
-
+    //获取扫描音乐完成标志
     public boolean getScanFlag() {
         boolean res = preferences.getBoolean("scanflag", false);
+        return res;
+    }
+
+    //设置最后播放歌曲id
+    public void setCurrentSongId(int id) {
+        editor.putInt("setCurrentSong", id);
+        editor.commit();
+    }
+    //获取最后播放歌曲id
+    public int getCurrentSongId() {
+        int res = preferences.getInt("setCurrentSong", 0);
+        return res;
+    }
+    //设置最后播放歌曲进度
+    public void setCurrentPos(int id) {
+        editor.putInt("setCurrentPos", id);
+        editor.commit();
+    }
+    //获取最后播放歌曲进取
+    public int getCurrentPos() {
+        int res = preferences.getInt("setCurrentPos", 0);
         return res;
     }
 }

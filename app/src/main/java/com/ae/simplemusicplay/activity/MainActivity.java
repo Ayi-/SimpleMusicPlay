@@ -1,9 +1,15 @@
 package com.ae.simplemusicplay.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -40,16 +46,15 @@ import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, SongListAdapter.ClickListener {
 
-    public static boolean startserviceFlag = false;
     //歌曲列表
     private PlayList playList;
-    //设置参数
+    //设置参数用的工具类
     private SharePreferenceUtils sharePreferenceUtils;
     //两次返回退出计时用
     long[] mHits = new long[2];
 
     //按两次同一首歌就切换到播放界面,通过前后点击位置来判断
-    private int firstPositionClick=-1;
+    private int firstPositionClick = -1;
 
     private Handler handler;
     //按钮
@@ -61,6 +66,8 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView mRecyclerView;
     private LinearLayoutManager linearLayoutManager;
     private SongListAdapter songListAdapter;
+    //定义一个广播，用来修改UI界面
+    private NameSingerBroadCast receiverNameSinger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +78,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         //右侧滑动菜单
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -81,6 +87,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //初始化sharePreference
+        sharePreferenceUtils = SharePreferenceUtils.getInstance(getApplicationContext());
         //初始化list实例
         playList = PlayList.getInstance(this);
 
@@ -104,11 +112,18 @@ public class MainActivity extends AppCompatActivity
                 Bundle bundle = msg.getData();
                 String message = bundle.getString("message");
                 showToast(getApplicationContext(), message);
+                //设置最后播放的歌曲和进度
+                playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
+                playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
+                //修改UI
+                changeUI();
+                //启动服务
+                startservice(getApplicationContext());
+
             }
         };
 
-        //初始化sharePreference
-        sharePreferenceUtils = SharePreferenceUtils.getInstance(getApplicationContext());
+
         //是否第一次使用本APP（进行歌曲扫描）
         Log.i("Simple", "scan");
         if (sharePreferenceUtils.isFirstTimeUse()) {
@@ -124,8 +139,8 @@ public class MainActivity extends AppCompatActivity
         Log.i("Simple", "load");
 
         //更新播放列表
-        if (playList.getListsize() <= 0)
-            handler.post(runnable);
+//        if (playList.getListsize() <= 0)
+        handler.post(runnable);
 
         //按钮事件注册
         imageIcon.setOnClickListener(this);
@@ -140,6 +155,14 @@ public class MainActivity extends AppCompatActivity
         //歌曲列表填充
         mRecyclerView.setAdapter(songListAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        //注册UI修改广播
+        receiverNameSinger = new NameSingerBroadCast();
+        IntentFilter filterNameSinger = new IntentFilter();
+        filterNameSinger.addAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
+        registerReceiver(receiverNameSinger, filterNameSinger);
+
+
     }
 
     //按返回键关掉菜单
@@ -162,12 +185,17 @@ public class MainActivity extends AppCompatActivity
             mHits[mHits.length - 1] = SystemClock.uptimeMillis();
 
             if (mHits[0] >= (SystemClock.uptimeMillis() - 1000)) {
+
                 finish();
             } else {
                 showToast(this, "再次点击关闭音乐退出");
+
             }
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
-        return true;
+
     }
 
     //OptionsMenu
@@ -212,8 +240,29 @@ public class MainActivity extends AppCompatActivity
             Intent intentExit = new Intent();
             intentExit.setAction(OpUtil.BROADCAST_EXIT);
             sendBroadcast(intentExit);
-                        Log.i("ae", "send exit!");
+            Log.i("ae", "send exit!");
             finish();
+        } else if (id == R.id.nav_search_music) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MediaScannerConnection.scanFile(getApplicationContext(), new String[]{Environment.getExternalStorageDirectory().toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+                        /*
+                         *   (non-Javadoc)
+                         * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
+                         */
+                        public void onScanCompleted(String path, Uri uri) {
+                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                            Log.i("ExternalStorage", "-> uri=" + uri);
+                        }
+                    });
+                    searchSongs();
+                    handler.post(runnable);
+                }
+            }).start();
+
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -254,7 +303,7 @@ public class MainActivity extends AppCompatActivity
                 //专辑id
                 long albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
-                if (duration > 240000) {
+                if (duration > 120000) {
                     //先判断0是否存在
                     Log.i("Simple", songName + "  " + id + "  " + albumId + "  " + duration);
                     if (DataSupport.where("songId = ?", String.valueOf(id)).find(SongInfo.class).isEmpty()) {
@@ -264,8 +313,13 @@ public class MainActivity extends AppCompatActivity
                         info.setAlbumName(album);
                         info.setAlbumId(albumId);
                         info.setArtistName(artist);
+                        try {
 
-                        info.setPinyin(HanZiToPinYinUtils.HanZiToPinYin(songName));
+                            info.setPinyin(HanZiToPinYinUtils.HanZiToPinYin(songName));
+                        } catch (Exception e) {
+                            info.setPinyin("#");
+                            e.printStackTrace();
+                        }
                         info.setSongId(id);
                         info.setDuration(duration);
                         info.save();
@@ -294,10 +348,11 @@ public class MainActivity extends AppCompatActivity
                 playList.addToList(DataSupport.findAll(SongInfo.class), 0);
                 showToastForHandler(handler, "加载" + playList.getListsize() + "首歌");
                 Log.i("Simple", "加载" + playList.getListsize() + "首歌");
-
+                songListAdapter.notifyDataSetChanged();
             }
         }
     };
+
 
     //通过handler发送Toast
     public void showToastForHandler(Handler handler, String msg) {
@@ -311,17 +366,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         //切换播放按钮图标
-        if (playList.isPlaying()) {
-            imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
-        } else {
-            imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
-        }
+        changeUI();
         super.onResume();
     }
 
     @Override
     public void onClick(View v) {
         Intent intentOp = getOPIntent();
+        Log.i("btn_current_song", playList.getCurrent() + "");
+        Log.i("btn_playlist_size", playList.getListsize() + "");
         //通过广播形式发送操作
         switch (v.getId()) {
             //播放与暂停
@@ -330,32 +383,27 @@ public class MainActivity extends AppCompatActivity
 
                 if (playList.isPlaying()) {
                     intentOp.putExtra("op", OpUtil.OP_PAUSE);
-                    imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
-
                 } else {
                     intentOp.putExtra("op", OpUtil.OP_CONTINUE);
-                    imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
                 }
+
                 sendBroadcast(intentOp);
                 break;
             //上一首
             case R.id.imgbtn_previous_List:
                 intentOp.putExtra("op", OpUtil.OP_PREVIOUS);
-                imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
-
                 sendBroadcast(intentOp);
+
                 break;
             //下一首
             case R.id.imgbtn_next_List:
                 intentOp.putExtra("op", OpUtil.OP_NEXT);
-                imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
-
                 sendBroadcast(intentOp);
                 break;
             case R.id.image_icon:
                 if (playList.getListsize() > 0) {
                     //切换到播放界面
-                   startPlayMusicActivity();
+                    startPlayMusicActivity();
                 }
                 break;
         }
@@ -364,33 +412,28 @@ public class MainActivity extends AppCompatActivity
     //设置recycleview item的点击事件
     @Override
     public void onItemClick(int position, View v) {
-        Log.i("item", "onItemClick position: " + position);
+        firstPositionClick = playList.getCurrent();
         playList.setCurrent(position);
         //判断是否同一首歌按了两次
-        if(firstPositionClick!=position)
-        {
-            firstPositionClick=position;
-        }
-        else
-        {
-            firstPositionClick=-1;
+        if (firstPositionClick != position) {
+            //播放点击的音乐
+            Intent intentOp = getOPIntent();
+            intentOp.putExtra("op", OpUtil.OP_PLAY);
+            changeUI();
+            sendBroadcast(intentOp);
+            Log.i("item", "onItemClick position: " + position);
+
+        } else {
+            //第二次进入播放界面
             startPlayMusicActivity();
         }
-        Intent intentOp = getOPIntent();
-        intentOp.putExtra("op", OpUtil.OP_PLAY);
-        imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
 
-        sendBroadcast(intentOp);
     }
 
     //获取操作音乐播放的intent,用来发送广播
     public Intent getOPIntent() {
         Intent intentOp = new Intent();
         intentOp.setAction(OpUtil.BROADCAST_BTN);
-        if (!startserviceFlag) {
-            startservice(getApplicationContext());
-            startserviceFlag = true;
-        }
         return intentOp;
     }
 
@@ -399,5 +442,38 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(MainActivity.this, PlayMusic.class);
 
         startActivity(intent);
+    }
+
+
+    //UI修改
+    public void changeUI() {
+        if (playList.getListsize() > 0) {
+            SongInfo song = playList.getCurrentSong();
+            if (playList.isPlaying())
+                imgbtn_play_List.setImageResource(R.mipmap.ic_pause_circle_outline_black_48dp);
+            else
+                imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
+        }
+    }
+
+    //广播 修改歌曲名和歌手名
+    public class NameSingerBroadCast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            changeUI();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        //注销广播
+        if (receiverNameSinger != null) {
+            unregisterReceiver(receiverNameSinger);
+        }
+        if (playList != null)
+            playList = null;
+
+        super.onDestroy();
     }
 }

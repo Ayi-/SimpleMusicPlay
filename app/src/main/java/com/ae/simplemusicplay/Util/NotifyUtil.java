@@ -91,7 +91,7 @@ public class NotifyUtil {
         //会报错，还在找解决思路
 //		notify.contentView = mRemoteViews;
 //		notify.contentIntent = PendingIntent.getActivity(this, 0, new Intent(), 0);
-        mNotificationManager.notify(200, notify);
+        mNotificationManager.notify(OpUtil.NOTIFYID, notify);
     }
 
     /**

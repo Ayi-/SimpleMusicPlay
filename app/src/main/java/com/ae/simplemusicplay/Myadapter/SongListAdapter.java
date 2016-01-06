@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ae.simplemusicplay.R;
+import com.ae.simplemusicplay.Util.ImageUtil;
 import com.ae.simplemusicplay.model.SongInfo;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     List<SongInfo> messageList;
 
     private static ClickListener clickListener;
+
     //初始化
     public SongListAdapter(Context context, List<SongInfo> messageList) {
         this.mContext = context;
@@ -52,6 +54,11 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         //设置歌手名
         ((ItemViewHolder) holder).singerTextView.setText(messageList.get(position).getArtistName());
 
+        //设置图片
+        ((ItemViewHolder) holder).songImgView.setImageBitmap(ImageUtil.getArtwork(mContext, messageList.get(position).getSongId(), messageList.get(position).getAlbumId(), true, true));
+        //设置音乐时长
+        ((ItemViewHolder) holder).durationTextView.setText(formatTime(messageList.get(position).getDuration()));
+
     }
 
     @Override
@@ -60,17 +67,18 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-
-
     //自定义的ViewHolder，持有每个Item的的所有界面元素
     public static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         //创建3个view，对应列表的图片，歌名，歌手名
         ImageView songImgView;
         TextView nameTextView;
         TextView singerTextView;
+        TextView durationTextView;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
+            durationTextView = (TextView) itemView.findViewById(R.id.music_duration);
+
             songImgView = (ImageView) itemView.findViewById(R.id.image_view);
             nameTextView = (TextView) itemView.findViewById(R.id.text_view_name);
             singerTextView = (TextView) itemView.findViewById(R.id.text_view_singer);
@@ -100,6 +108,7 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 //            return false;
 //        }
     }
+
     public void setOnItemClickListener(ClickListener clickListener) {
         SongListAdapter.clickListener = clickListener;
     }
@@ -110,4 +119,30 @@ public class SongListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         // void onItemLongClick(int position, View v);
     }
 
+    /**
+     * 格式化时间，将毫秒转换为分:秒格式
+     *
+     * @param time
+     * @return
+     */
+    public static String formatTime(long time) {
+        String min = time / (1000 * 60) + "";
+        String sec = time % (1000 * 60) + "";
+        if (min.length() < 2) {
+            min = "0" + time / (1000 * 60) + "";
+        } else {
+            min = time / (1000 * 60) + "";
+        }
+        if (sec.length() == 4) {
+            sec = "0" + (time % (1000 * 60)) + "";
+        } else if (sec.length() == 3) {
+            sec = "00" + (time % (1000 * 60)) + "";
+        } else if (sec.length() == 2) {
+            sec = "000" + (time % (1000 * 60)) + "";
+        } else if (sec.length() == 1) {
+            sec = "0000" + (time % (1000 * 60)) + "";
+        }
+        return min + ":" + sec.trim().substring(0, 2);
+
+    }
 }
