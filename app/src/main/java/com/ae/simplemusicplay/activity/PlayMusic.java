@@ -186,7 +186,6 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         //BIND_AUTO_CREATE会自动创建服务（如果服务并没有start）,这里设置0（不会自动start服务）
         bindService(bindIntent, connection, 0);
 
-
     }
 
     //UI修改

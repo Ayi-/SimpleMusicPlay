@@ -133,7 +133,7 @@
             android:layout_marginLeft="90dp"
             android:scaleType="fitXY"
             android:background="#00FFFFFF"
-            android:src="@mipmap/ic_skip_previous_black_48dp" />
+            android:src="@drawable/btn_pre" />
 
         <ImageButton
             android:id="@+id/imgbtn_play_play"
@@ -155,16 +155,8 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="90dp"
             android:background="#00FFFFFF"
-            android:src="@mipmap/ic_skip_next_black_48dp" />
-        <ImageButton
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="fitXY"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="30dp"
-            android:background="#00FFFFFF"
-            android:src="@mipmap/ic_queue_music_grey600_48dp" />
+            android:src="@drawable/btn_next" />
+
     </RelativeLayout>
 
 </RelativeLayout>
