@@ -102,7 +102,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         //注册广播
         receiverSeek = new SeekBroadCast();
         IntentFilter filterSeek = new IntentFilter();
-        filterExit.addAction(OpUtil.BROADCAST_SEEKBAR);
+        filterSeek.addAction(OpUtil.BROADCAST_SEEKBAR);
         registerReceiver(receiverSeek, filterSeek);
 
         receiverNameSinger = new NameSingerBroadCast();
@@ -305,7 +305,6 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         public void onReceive(Context context, Intent intent) {
             Log.i("exit", "exit");
             finish();
-
         }
     }
 

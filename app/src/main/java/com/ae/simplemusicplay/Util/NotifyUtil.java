@@ -82,8 +82,8 @@ public class NotifyUtil {
         mBuilder = new NotificationCompat.Builder(mContext);
 
         mRemoteViews = new RemoteViews(mContext.getPackageName(), R.layout.view_custom_button);
-        if(loadedImage!=null)
-            mRemoteViews.setImageViewBitmap(R.id.custom_song_icon,loadedImage);
+        if (loadedImage != null)
+            mRemoteViews.setImageViewBitmap(R.id.custom_song_icon, loadedImage);
         else
             mRemoteViews.setImageViewResource(R.id.custom_song_icon, R.mipmap.notice_icon);
         //API3.0 以上的时候显示按钮，否则消失
@@ -125,6 +125,7 @@ public class NotifyUtil {
         //buttonIntent.putExtra("op", OpUtil.OP_PLAY);
         PendingIntent intent_paly = PendingIntent.getBroadcast(mContext, 2, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_play, intent_paly);
+
                                 /* 下一首 按钮  */
         buttonIntent.putExtra("op", OpUtil.OP_NEXT);
         PendingIntent intent_next = PendingIntent.getBroadcast(mContext, 3, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -150,7 +151,7 @@ public class NotifyUtil {
      * 获取当前系统SDK版本号
      */
     public static int getSystemVersion() {
-		/*获取当前系统的android版本号*/
+        /*获取当前系统的android版本号*/
         int version = android.os.Build.VERSION.SDK_INT;
         return version;
     }
