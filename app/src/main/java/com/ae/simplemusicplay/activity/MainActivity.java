@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity
             public void handleMessage(android.os.Message msg) {
                 Bundle bundle = msg.getData();
                 String message = bundle.getString("message");
-                if(!message.equals(""))
+                if (!message.equals(""))
                     showToast(getApplicationContext(), message);
                 else {
                     //设置最后播放的歌曲和进度
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
 
         //更新播放列表
 //        if (playList.getListsize() <= 0)
-        if(!sharePreferenceUtils.getScanFlag()||!sharePreferenceUtils.isFirstTimeUse()||playList.getListsize()<=0)
+        if (!sharePreferenceUtils.getScanFlag() || !sharePreferenceUtils.isFirstTimeUse() || playList.getListsize() <= 0)
             handler.post(runnable);
 
         //按钮事件注册
@@ -278,11 +278,18 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_native_music) {
-
+            View view2 = findViewById(R.id.settings_container);
+            view2.setVisibility(View.INVISIBLE);
+            View view1 = findViewById(R.id.musiclist_container);
+            view1.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_sleeptime) {
 
         } else if (id == R.id.nav_setting) {
+            View view1 = findViewById(R.id.settings_container);
 
+            View view2 = findViewById(R.id.musiclist_container);
+            view2.setVisibility(View.INVISIBLE);
+            view1.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_exit) {
             //退出应用
             Log.i("ae", id + "   " + R.id.nav_exit);
@@ -399,7 +406,7 @@ public class MainActivity extends AppCompatActivity
                 //Log.i("Simple", "加载" + playList.getListsize() + "首歌");
                 songListAdapter.notifyDataSetChanged();
                 //更新
-                showToastForHandler(handler,"");
+                showToastForHandler(handler, "");
             }
         }
     };
@@ -505,7 +512,7 @@ public class MainActivity extends AppCompatActivity
                 imgbtn_play_List.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
 
             Uri uri = ContentUris.withAppendedId(OpUtil.ARTISTURI, song.getAlbumId());
-                    MainActivity.imageLoader.displayImage(String.valueOf(uri), imageIcon, MainActivity.options);
+            MainActivity.imageLoader.displayImage(String.valueOf(uri), imageIcon, MainActivity.options);
 
         }
     }
@@ -527,7 +534,7 @@ public class MainActivity extends AppCompatActivity
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
         }
-        if (receiverExit != null){
+        if (receiverExit != null) {
             unregisterReceiver(receiverExit);
         }
         if (playList != null)
@@ -535,6 +542,7 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
     //广播 用来接收退出
     public class ExitBroadCast extends BroadcastReceiver {
 

@@ -115,7 +115,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
                 Log.i("run progress", position + "");
                 sendBroadcast(intent);
 
-                seekHandler.postDelayed(this, 1000);
+                seekHandler.postDelayed(this, 100);
             }
         }
     };

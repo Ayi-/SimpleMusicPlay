@@ -20,7 +20,6 @@ import java.util.List;
  * Created by chen on 2015/12/26.
  */
 public class LrcView extends TextView {
-
     private float width;
     private float height;
     Paint currentPaint;
@@ -71,8 +70,8 @@ public class LrcView extends TextView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        currentPaint.setColor(Color.parseColor("#BA474D"));  //播放歌词的颜色
-        noCurrentPaint.setColor(Color.parseColor("#96C5BE"));  //未播放
+        currentPaint.setColor(Color.parseColor("#212121"));  //播放歌词的颜色
+        noCurrentPaint.setColor(Color.parseColor("#424242"));  //未播放
 
         currentPaint.setTextSize(35);
         currentPaint.setTypeface(Typeface.SERIF);
