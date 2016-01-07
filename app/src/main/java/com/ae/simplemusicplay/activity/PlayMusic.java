@@ -83,6 +83,14 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
 
+        ImageButton cancelButton = (ImageButton)findViewById(R.id.cancel_action);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         //注册广播
         receiverSeek = new SeekBroadCast();
         IntentFilter filterExit = new IntentFilter();
