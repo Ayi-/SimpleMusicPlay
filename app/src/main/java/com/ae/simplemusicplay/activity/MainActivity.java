@@ -76,6 +76,10 @@ public class MainActivity extends AppCompatActivity
     public static ImageLoader imageLoader = ImageLoader.getInstance();
     public static DisplayImageOptions options;
 
+
+    //定义一个广播，用来执行退出
+    private ExitBroadCast receiverExit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,6 +177,13 @@ public class MainActivity extends AppCompatActivity
                 .showImageForEmptyUri(R.mipmap.music5) // resource or drawable
                 .showImageOnFail(R.mipmap.music5)// resource or drawable
                 .build();
+
+        //退出
+        receiverExit = new ExitBroadCast();
+        IntentFilter filterExit = new IntentFilter();
+        filterExit.addAction(OpUtil.BROADCAST_EXIT);
+        registerReceiver(receiverExit, filterExit);
+
     }
 
     //按返回键关掉菜单
@@ -484,9 +495,21 @@ public class MainActivity extends AppCompatActivity
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
         }
+        if (receiverExit != null){
+            unregisterReceiver(receiverExit);
+        }
         if (playList != null)
             playList = null;
 
         super.onDestroy();
+    }
+    //广播 用来接收退出
+    public class ExitBroadCast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("exit", "exit");
+            finish();
+        }
     }
 }

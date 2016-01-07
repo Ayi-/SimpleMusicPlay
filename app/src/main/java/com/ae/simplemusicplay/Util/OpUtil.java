@@ -26,6 +26,7 @@ public class OpUtil {
     public static final int OP_NEXT = 0x04;
     public static final int OP_PREVIOUS = 0x05;
 
+
         public static final int NOTIFYID = 0x200;
     //获取专辑图片
     public static final Uri ARTISTURI = Uri.parse("content://media/external/audio/albumart");

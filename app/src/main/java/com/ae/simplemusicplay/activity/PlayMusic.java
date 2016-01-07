@@ -57,6 +57,9 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     //定义一个广播，用来修改UI界面
     private NameSingerBroadCast receiverNameSinger;
 
+    //定义一个广播，用来执行退出
+    private ExitBroadCast receiverExit;
+
     //临时使用Binder连接
     private ServiceConnection connection = new ServiceConnection() {
 
@@ -83,11 +86,16 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
 
+        receiverExit = new ExitBroadCast();
+        IntentFilter filterExit = new IntentFilter();
+        filterExit.addAction(OpUtil.BROADCAST_EXIT);
+        registerReceiver(receiverExit, filterExit);
+
         //注册广播
         receiverSeek = new SeekBroadCast();
-        IntentFilter filterExit = new IntentFilter();
+        IntentFilter filterSeek = new IntentFilter();
         filterExit.addAction(OpUtil.BROADCAST_SEEKBAR);
-        registerReceiver(receiverSeek, filterExit);
+        registerReceiver(receiverSeek, filterSeek);
 
         receiverNameSinger = new NameSingerBroadCast();
         IntentFilter filterNameSinger = new IntentFilter();
@@ -245,6 +253,9 @@ public class PlayMusic extends Activity implements View.OnClickListener {
             unregisterReceiver(receiverNameSinger);
         if (receiverSeek != null)
             unregisterReceiver(receiverSeek);
+        if (receiverExit != null){
+            unregisterReceiver(receiverExit);
+        }
         //注销
         if (connection != null)
             unbindService(connection);
@@ -272,6 +283,17 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             changeUI();
+        }
+    }
+
+    //广播 用来接收退出
+    public class ExitBroadCast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("exit", "exit");
+            finish();
+
         }
     }
 

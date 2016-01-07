@@ -65,6 +65,12 @@ public class NotifyUtil {
  **/
         //点击的事件处理
         Intent buttonIntent = new Intent(OpUtil.BROADCAST_BTN);
+        //退出
+        Intent button_exit_Intent = new Intent(OpUtil.BROADCAST_EXIT);
+        PendingIntent intent_exit = PendingIntent.getBroadcast(context, 1, button_exit_Intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mRemoteViews.setOnClickPendingIntent(R.id.clean_notify, intent_exit);
+
+
         /* 上一首按钮 */
         buttonIntent.putExtra("op", OpUtil.OP_PREVIOUS);
         //这里加了广播，所及INTENT的必须用getBroadcast方法
@@ -97,6 +103,7 @@ public class NotifyUtil {
 //		notify.contentView = mRemoteViews;
 //		notify.contentIntent = PendingIntent.getActivity(this, 0, new Intent(), 0);
         mNotificationManager.notify(OpUtil.NOTIFYID, notify);
+
     }
 
     /**
