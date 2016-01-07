@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import com.ae.simplemusicplay.PlayList;
 import com.ae.simplemusicplay.R;
 import com.ae.simplemusicplay.Util.OpUtil;
+import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
 import com.ae.simplemusicplay.services.MusicPlayService;
 import com.ae.simplemusicplay.widgets.CircleImageView;
@@ -29,12 +32,14 @@ import com.ae.simplemusicplay.widgets.CircularSeekBar;
 import static com.ae.simplemusicplay.Util.StartService.startservice;
 
 public class PlayMusic extends Activity implements View.OnClickListener {
-
+    //播放次序
+    private Integer orderId;
     //歌曲名
     private TextView tv_name;
     //歌手名
     private TextView tv_singer;
-
+    //循环按钮
+    private ImageButton playOrder;
     //播放按钮
     private ImageButton imgbtn_play_play;
     //上一首
@@ -56,6 +61,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     private SeekBroadCast receiverSeek;
     //定义一个广播，用来修改UI界面
     private NameSingerBroadCast receiverNameSinger;
+    SharePreferenceUtils sharePreferenceUtils;
 
     //临时使用Binder连接
     private ServiceConnection connection = new ServiceConnection() {
@@ -82,8 +88,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-
-        ImageButton cancelButton = (ImageButton)findViewById(R.id.cancel_action);
+        //加载页面，读取sharepreference中记录的播放顺序，根据播放顺序显示图标
+        sharePreferenceUtils = SharePreferenceUtils.getInstance(this);
+        setOrderImagebutton();
+        ImageButton cancelButton = (ImageButton) findViewById(R.id.cancel_action);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,7 +192,47 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         initServiceBinder();
         seekBar.setProgress(playList.getCurrentPos());
     }
+    //设置播放顺序按钮的图标与点击事件
+    private void setOrderImagebutton(){
+        playOrder = (ImageButton) findViewById(R.id.play_order_button);
+        orderId = sharePreferenceUtils.getPlayMode();
+        switch (orderId) {
+            case 0:
+                playOrder.setImageResource(R.mipmap.ic_repeat_black_48dp);
+                break;
+            case 1:
+                playOrder.setImageResource(R.mipmap.ic_shuffle_black_48dp);
+                break;
+            case 2:
+                playOrder.setImageResource(R.mipmap.ic_repeat_one_black_48dp);
+                break;
+        }
 
+        playOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                orderId = sharePreferenceUtils.getPlayMode();
+                switch (orderId) {
+                    case 0:
+                        playOrder.setImageResource(R.mipmap.ic_shuffle_black_48dp);
+                        sharePreferenceUtils.setPlayMode(1);
+                        break;
+                    case 1:
+                        playOrder.setImageResource(R.mipmap.ic_repeat_one_black_48dp);
+                        sharePreferenceUtils.setPlayMode(2);
+                        break;
+                    case 2:
+                        playOrder.setImageResource(R.mipmap.ic_repeat_black_48dp);
+                        sharePreferenceUtils.setPlayMode(0);
+                        break;
+
+                }
+            }
+        });
+
+
+
+    }
 
     public void initServiceBinder() {
         //先检查服务是否已经先启动，然后再启动服务
@@ -213,7 +261,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
                 imgbtn_play_play.setImageResource(R.mipmap.ic_play_circle_outline_black_48dp);
 
             Uri uri = ContentUris.withAppendedId(OpUtil.ARTISTURI, song.getAlbumId());
-                               MainActivity.imageLoader.displayImage(String.valueOf(uri),circleImage , MainActivity.options);
+            MainActivity.imageLoader.displayImage(String.valueOf(uri), circleImage, MainActivity.options);
 
         }
     }
@@ -226,12 +274,11 @@ public class PlayMusic extends Activity implements View.OnClickListener {
             case R.id.imgbtn_play_play:
                 if (playList.isPlaying()) {
                     myBinder.pause();
-                changeUI();
+                    changeUI();
 
                 } else {
                     myBinder.continueplay();
-                changeUI();
-
+                    changeUI();
                 }
                 break;
             //下一首
@@ -251,7 +298,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     protected void onDestroy() {
 
         super.onDestroy();
-        Log.i("Destroy","play music ");
+        Log.i("Destroy", "play music ");
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
         }
