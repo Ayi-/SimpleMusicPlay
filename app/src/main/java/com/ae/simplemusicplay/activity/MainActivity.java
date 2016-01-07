@@ -121,6 +121,8 @@ public class MainActivity extends AppCompatActivity
                 String message = bundle.getString("message");
                 showToast(getApplicationContext(), message);
                 //设置最后播放的歌曲和进度
+                Log.i("main handle",sharePreferenceUtils.getCurrentSongId()+"");
+                Log.i("main handle",sharePreferenceUtils.getCurrentPos()+"");
                 playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
                 playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
                 //修改UI
@@ -480,13 +482,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        Log.i("Destroy", "MainActivity ");
+        super.onDestroy();
         //注销广播
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
         }
-        if (playList != null)
-            playList = null;
-
-        super.onDestroy();
     }
 }

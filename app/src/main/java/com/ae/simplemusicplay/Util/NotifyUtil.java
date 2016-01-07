@@ -23,7 +23,7 @@ public class NotifyUtil {
      */
     public static NotificationManager mNotificationManager;
 
-    public static void showButtonNotify(Context context, boolean playFlag,String name,String singer) {
+    public static void showButtonNotify(Context context, boolean playFlag, String name, String singer) {
 /*
         //大视图
         android.support.v4.app.NotificationCompat.InboxStyle inboxStyle = new android.support.v4.app.NotificationCompat.InboxStyle();
@@ -51,18 +51,6 @@ public class NotifyUtil {
             }
         }
 
-
-/**
- //广播的action
- public static final String BROADCAST_BTN = "com.ae.simplemusicplay.services.btn";
-
- //按钮
- public static final int OP_PLAY = 0x01;
- public static final int OP_PAUSE = 0x02;
- public static final int OP_CONTINUE = 0x03;
- public static final int OP_NEXT = 0x04;
- public static final int OP_PREVIOUS = 0x05;
- **/
         //点击的事件处理
         Intent buttonIntent = new Intent(OpUtil.BROADCAST_BTN);
         /* 上一首按钮 */
@@ -70,10 +58,10 @@ public class NotifyUtil {
         //这里加了广播，所及INTENT的必须用getBroadcast方法
         PendingIntent intent_prev = PendingIntent.getBroadcast(context, 1, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.btn_custom_prev, intent_prev);
-		/* 播放/暂停  按钮 */
-        if (playFlag){
+        /* 播放/暂停  按钮 */
+        if (playFlag) {
             buttonIntent.putExtra("op", OpUtil.OP_PAUSE);
-        }else {
+        } else {
             buttonIntent.putExtra("op", OpUtil.OP_CONTINUE);
         }
         //buttonIntent.putExtra("op", OpUtil.OP_PLAY);
@@ -87,7 +75,7 @@ public class NotifyUtil {
         mBuilder.setContent(mRemoteViews)
                 .setContentIntent(getDefalutIntent(context))
                 .setWhen(System.currentTimeMillis())// 通知产生的时间，会在通知信息里显示
-                .setTicker("正在播放")
+                .setTicker("正在播放 "+name)
                 .setPriority(Notification.PRIORITY_DEFAULT)// 设置该通知优先级
                 .setOngoing(true)
                 .setSmallIcon(R.mipmap.ic_launcher);
@@ -125,7 +113,6 @@ public class NotifyUtil {
     }
 
 
-
     /**
      * 清除当前创建的通知栏
      */
@@ -144,7 +131,7 @@ public class NotifyUtil {
     public static PendingIntent getDefalutIntent(Context context) {
         Intent intent = new Intent(context, PlayMusic.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1,intent , PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
 }

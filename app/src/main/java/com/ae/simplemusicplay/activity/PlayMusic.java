@@ -74,7 +74,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
             //修改UI界面
             changeUI();
 
-            myBinder.play();
+            //myBinder.play();
         }
     };
 
@@ -180,10 +180,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     public void initServiceBinder() {
         //先检查服务是否已经先启动，然后再启动服务
-        Log.i("initservice", MusicPlayService.class.getName());
+        Log.i("play_initservice", MusicPlayService.class.getName());
 
         startservice(getApplicationContext());
-        Log.i("initservice", "bindService");
+        Log.i("play_initservice", "bindService");
 
         Intent bindIntent = new Intent(getApplicationContext(), MusicPlayService.class);
         //BIND_AUTO_CREATE会自动创建服务（如果服务并没有start）,这里设置0（不会自动start服务）
@@ -241,15 +241,19 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
-        if (receiverNameSinger != null)
-            unregisterReceiver(receiverNameSinger);
-        if (receiverSeek != null)
-            unregisterReceiver(receiverSeek);
-        //注销
-        if (connection != null)
-            unbindService(connection);
 
         super.onDestroy();
+        Log.i("Destroy","play music ");
+        if (receiverNameSinger != null) {
+            unregisterReceiver(receiverNameSinger);
+        }
+        if (receiverSeek != null) {
+            unregisterReceiver(receiverSeek);
+        }
+        //注销
+        if (connection != null) {
+            unbindService(connection);
+        }
     }
 
     //广播 用来设置seekBar进度条

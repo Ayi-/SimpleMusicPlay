@@ -47,56 +47,57 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (playList != null)
-            if (!playList.isPlaying())
-            {
-                        //设置最后播放歌曲资源
-        try {
-            mediaPlayer.setDataSource(playList.getCurrentSong().getPath());
-            //必须在prepare()之前调用这个
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-            }
-//                playMusic(playList.getCurrentSong());
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onCreate() {
-        sharePreferenceUtils = SharePreferenceUtils.getInstance(getApplicationContext());
-        //创建播放器对象
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnCompletionListener(this);
-        //初始化handler
-        seekHandler = new Handler();
         //获取列表
         playList = PlayList.getInstance(getApplicationContext());
-        Log.i("service", playList.getListsize() + "");
-        Log.i("service", "create service");
-        songid = -1;
-        /**
-         * 注册按钮操作广播
-         */
-        receiver = new MyBroadCast();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(OpUtil.BROADCAST_BTN);
-        registerReceiver(receiver, filter);
-        /**
-         * 注册退出事件广播
-         */
-        Log.i("initservice", "startBroadCast");
 
-        receiverExit = new ExitBroadCast();
-        IntentFilter filterExit = new IntentFilter();
-        filterExit.addAction(OpUtil.BROADCAST_EXIT);
-        registerReceiver(receiverExit, filterExit);
-        Log.i("initservice", "init ok!");
+        if (playList.getListsize() > 0) {
+            sharePreferenceUtils = SharePreferenceUtils.getInstance(getApplicationContext());
+            //创建播放器对象
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnCompletionListener(this);
+            //初始化handler
+            seekHandler = new Handler();
+            Log.i("service", playList.getListsize() + "");
+            Log.i("service", "create service");
+            songid = -1;
 
+            if (playList != null)
+                if (!playList.isPlaying()) {
+                    //设置最后播放歌曲资源
+                    try {
+                        mediaPlayer.setDataSource(playList.getCurrentSong().getPath());
+                        //必须在prepare()之前调用这个
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
+            /**
+             * 注册按钮操作广播
+             */
+            receiver = new MyBroadCast();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(OpUtil.BROADCAST_BTN);
+            registerReceiver(receiver, filter);
+            /**
+             * 注册退出事件广播
+             */
+            Log.i("initservice", "startBroadCast");
 
+            receiverExit = new ExitBroadCast();
+            IntentFilter filterExit = new IntentFilter();
+            filterExit.addAction(OpUtil.BROADCAST_EXIT);
+            registerReceiver(receiverExit, filterExit);
+            Log.i("initservice", "init ok!");
+
+        }
         super.onCreate();
     }
 
@@ -104,15 +105,18 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
     Runnable runnableSeekBar = new Runnable() {
         @Override
         public void run() {
+            if (playList.isPlaying()) {
+                int position = mediaPlayer.getCurrentPosition();
+                Intent intent = new Intent();
+                intent.setAction(OpUtil.BROADCAST_SEEKBAR);
+                intent.putExtra("progress", position);
+                playList.setCurrentPos(position);
+                sharePreferenceUtils.setCurrentPos(position);
+                Log.i("run progress", position + "");
+                sendBroadcast(intent);
 
-            Intent intent = new Intent();
-            intent.setAction(OpUtil.BROADCAST_SEEKBAR);
-            intent.putExtra("progress", mediaPlayer.getCurrentPosition());
-            playList.setCurrentPos(mediaPlayer.getCurrentPosition());
-            sharePreferenceUtils.setCurrentPos(mediaPlayer.getCurrentPosition());
-            sendBroadcast(intent);
-            if (playList.isPlaying())
                 seekHandler.postDelayed(this, 1000);
+            }
         }
     };
 
@@ -140,9 +144,6 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
                 mediaPlayer.prepare();
                 mediaPlayer.start();
 
-                //保存当前播放歌曲和记录
-                sharePreferenceUtils.setCurrentSongId(playList.getCurrent());
-                sharePreferenceUtils.setCurrentPos(0);
                 seekHandler.removeCallbacks(runnableSeekBar);
                 seekHandler.postDelayed(runnableSeekBar, 0);
 
@@ -158,6 +159,13 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             Intent intent = new Intent();
             intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
             sendBroadcast(intent);
+            //保存当前播放歌曲和记录
+
+            sharePreferenceUtils.setCurrentPos(mediaPlayer.getCurrentPosition());
+            sharePreferenceUtils.setCurrentSongId(playList.getCurrent());
+            Log.i("main handle", sharePreferenceUtils.getCurrentSongId() + "");
+            Log.i("main handle", sharePreferenceUtils.getCurrentPos() + "");
+
         }
     }
 
@@ -199,10 +207,10 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
              * 通知设置
              */
             showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
-                    //发送修改UI界面广播
-        Intent intent = new Intent();
-        intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
-        sendBroadcast(intent);
+            //发送修改UI界面广播
+            Intent intent = new Intent();
+            intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
+            sendBroadcast(intent);
         }
     }
 
@@ -237,10 +245,10 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
              * 通知设置
              */
             showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
-                    //发送修改UI界面广播
-        Intent intent = new Intent();
-        intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
-        sendBroadcast(intent);
+            //发送修改UI界面广播
+            Intent intent = new Intent();
+            intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
+            sendBroadcast(intent);
         }
     }
 
@@ -249,6 +257,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
     @Override
     public IBinder onBind(Intent intent) {
         Log.i("onBind", "return  Bind");
+
 
         return mybinder;
     }
@@ -328,12 +337,23 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
 
     @Override
     public void onDestroy() {
+        Log.i("destroy", "cancle notify");
+        //关闭通知栏
+        if (NotifyUtil.mNotificationManager != null)
+            NotifyUtil.clearNotify(OpUtil.NOTIFYID);
+        Log.i("destroy", "destroy  mediaPlayer");
         if (mediaPlayer != null) {
+            mediaPlayer.pause();
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        Log.i("destroy", "destroy  playList");
+        if (playList != null)
+            playList.setIsPlaying(false);
+        Log.i("destroy", "destroy  seekHandler");
         //销毁handler
         seekHandler.removeCallbacks(runnableSeekBar);
+        Log.i("destroy", "unregister  receiverExit");
 
         //注销广播
         try {
@@ -343,16 +363,14 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
         } catch (Exception e) {
             receiverExit = null;
         }
+        Log.i("destroy", "unregister  receiver");
+
         try {
             if (receiver != null)
                 unregisterReceiver(receiver);
         } catch (Exception e) {
             receiver = null;
         }
-
-        //关闭通知栏
-        if(NotifyUtil.mNotificationManager!=null)
-            NotifyUtil.clearNotify(OpUtil.NOTIFYID);
         stopSelf();
         super.onDestroy();
     }
