@@ -53,6 +53,8 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     //歌曲列表
     private PlayList playList;
 
+    private int orderId;
+    private ImageButton playOrder;
     //定义一个广播，用来执行退出
     private SeekBroadCast receiverSeek;
     //定义一个广播，用来修改UI界面
@@ -97,7 +99,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         filterExit.addAction(OpUtil.BROADCAST_EXIT);
         registerReceiver(receiverExit, filterExit);
 
-        ImageButton cancelButton = (ImageButton)findViewById(R.id.cancel_action);
+        cancelButton = (ImageButton)findViewById(R.id.cancel_action);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
