@@ -533,7 +533,7 @@ public class MainActivity extends AppCompatActivity
         if (playList != null)
             playList = null;
 
-        super.onDestroy();
+
     }
     //广播 用来接收退出
     public class ExitBroadCast extends BroadcastReceiver {

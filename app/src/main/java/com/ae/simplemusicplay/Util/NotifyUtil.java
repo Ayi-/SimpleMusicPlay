@@ -107,7 +107,7 @@ public class NotifyUtil {
                                 /* 上一首按钮 */
         //退出
         Intent button_exit_Intent = new Intent(OpUtil.BROADCAST_EXIT);
-        PendingIntent intent_exit = PendingIntent.getBroadcast(context, 1, button_exit_Intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent intent_exit = PendingIntent.getBroadcast(mContext, 1, button_exit_Intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.clean_notify, intent_exit);
 
 
