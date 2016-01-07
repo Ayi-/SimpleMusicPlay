@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity
                 showToastForHandler(handler, "正在加载歌曲列表");
                 playList.addToList(DataSupport.findAll(SongInfo.class), 0);
                 showToastForHandler(handler, "加载" + playList.getListsize() + "首歌");
-                Log.i("Simple", "加载" + playList.getListsize() + "首歌");
+                //Log.i("Simple", "加载" + playList.getListsize() + "首歌");
                 songListAdapter.notifyDataSetChanged();
                 //更新
                 showToastForHandler(handler,"");
@@ -424,8 +424,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         Intent intentOp = getOPIntent();
-        Log.i("btn_current_song", playList.getCurrent() + "");
-        Log.i("btn_playlist_size", playList.getListsize() + "");
+        //Log.i("btn_current_song", playList.getCurrent() + "");
+        //Log.i("btn_playlist_size", playList.getListsize() + "");
         //通过广播形式发送操作
         switch (v.getId()) {
             //播放与暂停
@@ -472,7 +472,7 @@ public class MainActivity extends AppCompatActivity
             intentOp.putExtra("op", OpUtil.OP_PLAY);
             changeUI();
             sendBroadcast(intentOp);
-            Log.i("item", "onItemClick position: " + position);
+            //Log.i("item", "onItemClick position: " + position);
 
         } else {
             //第二次进入播放界面
@@ -521,7 +521,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        Log.i("Destroy", "MainActivity ");
+        //Log.i("Destroy", "MainActivity ");
         super.onDestroy();
         //注销广播
         if (receiverNameSinger != null) {
@@ -540,7 +540,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i("exit", "exit");
+            //Log.i("exit", "exit");
             finish();
         }
     }

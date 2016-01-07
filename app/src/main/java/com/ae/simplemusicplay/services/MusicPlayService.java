@@ -348,13 +348,13 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        Log.i("destroy", "destroy  playList");
+        //Log.i("destroy", "destroy  playList");
         if (playList != null)
             playList.setIsPlaying(false);
-        Log.i("destroy", "destroy  seekHandler");
+        //Log.i("destroy", "destroy  seekHandler");
         //销毁handler
         seekHandler.removeCallbacks(runnableSeekBar);
-        Log.i("destroy", "unregister  receiverExit");
+        //Log.i("destroy", "unregister  receiverExit");
 
         //注销广播
         try {
@@ -364,7 +364,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
         } catch (Exception e) {
             receiverExit = null;
         }
-        Log.i("destroy", "unregister  receiver");
+        //Log.i("destroy", "unregister  receiver");
 
         try {
             if (receiver != null)
