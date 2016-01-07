@@ -38,11 +38,16 @@ import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
 import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import org.litepal.crud.DataSupport;
+
+import java.io.File;
 
 import static com.ae.simplemusicplay.Util.StartService.startservice;
 import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
@@ -75,6 +80,7 @@ public class MainActivity extends AppCompatActivity
 
     public static ImageLoader imageLoader = ImageLoader.getInstance();
     public static DisplayImageOptions options;
+    public static ImageLoaderConfiguration config;
 
 
     //定义一个广播，用来执行退出
@@ -123,14 +129,19 @@ public class MainActivity extends AppCompatActivity
             public void handleMessage(android.os.Message msg) {
                 Bundle bundle = msg.getData();
                 String message = bundle.getString("message");
-                showToast(getApplicationContext(), message);
-                //设置最后播放的歌曲和进度
-                playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
-                playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
-                //修改UI
-                changeUI();
-                //启动服务
-                startservice(getApplicationContext());
+                if(!message.equals(""))
+                    showToast(getApplicationContext(), message);
+                else {
+                    //设置最后播放的歌曲和进度
+                    Log.i("main handle", sharePreferenceUtils.getCurrentSongId() + "");
+                    Log.i("main handle", sharePreferenceUtils.getCurrentPos() + "");
+                    playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
+                    playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
+                    //修改UI
+                    changeUI();
+                    //启动服务
+                    startservice(getApplicationContext());
+                }
             }
         };
 
@@ -150,7 +161,8 @@ public class MainActivity extends AppCompatActivity
 
         //更新播放列表
 //        if (playList.getListsize() <= 0)
-        handler.post(runnable);
+        if(!sharePreferenceUtils.getScanFlag()||!sharePreferenceUtils.isFirstTimeUse()||playList.getListsize()<=0)
+            handler.post(runnable);
 
         //按钮事件注册
         imageIcon.setOnClickListener(this);
@@ -172,11 +184,27 @@ public class MainActivity extends AppCompatActivity
         filterNameSinger.addAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
         registerReceiver(receiverNameSinger, filterNameSinger);
 
-        imageLoader.init(ImageLoaderConfiguration.createDefault(this));
+
         options = new DisplayImageOptions.Builder()
-                .showImageForEmptyUri(R.mipmap.music5) // resource or drawable
-                .showImageOnFail(R.mipmap.music5)// resource or drawable
+                .showImageForEmptyUri(R.mipmap.notice_icon) // resource or drawable
+                .showImageOnFail(R.mipmap.notice_icon)// resource or drawable
                 .build();
+
+        File cacheDir = StorageUtils.getCacheDirectory(this);
+        config = new ImageLoaderConfiguration.Builder(this)
+                .memoryCacheExtraOptions(480, 800) // default = device screen dimensions
+                .diskCacheExtraOptions(480, 800, null)
+                .threadPoolSize(3) // default
+                .denyCacheImageMultipleSizesInMemory()
+                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+                .memoryCacheSize(2 * 1024 * 1024)
+                .diskCacheSize(50 * 1024 * 1024)
+                .diskCacheFileCount(100)
+                .defaultDisplayImageOptions(options) // default
+                .writeDebugLogs()
+                .diskCache(new UnlimitedDiskCache(cacheDir)) // default
+                .build();
+        imageLoader.init(config);
 
         //退出
         receiverExit = new ExitBroadCast();
@@ -370,6 +398,8 @@ public class MainActivity extends AppCompatActivity
                 showToastForHandler(handler, "加载" + playList.getListsize() + "首歌");
                 Log.i("Simple", "加载" + playList.getListsize() + "首歌");
                 songListAdapter.notifyDataSetChanged();
+                //更新
+                showToastForHandler(handler,"");
             }
         }
     };
@@ -491,6 +521,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        Log.i("Destroy", "MainActivity ");
+        super.onDestroy();
         //注销广播
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);

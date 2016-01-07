@@ -77,7 +77,7 @@ public class PlayMusic extends Activity implements View.OnClickListener {
             //修改UI界面
             changeUI();
 
-            myBinder.play();
+            //myBinder.play();
         }
     };
 
@@ -90,6 +90,14 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         IntentFilter filterExit = new IntentFilter();
         filterExit.addAction(OpUtil.BROADCAST_EXIT);
         registerReceiver(receiverExit, filterExit);
+
+        ImageButton cancelButton = (ImageButton)findViewById(R.id.cancel_action);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         //注册广播
         receiverSeek = new SeekBroadCast();
@@ -188,10 +196,10 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     public void initServiceBinder() {
         //先检查服务是否已经先启动，然后再启动服务
-        Log.i("initservice", MusicPlayService.class.getName());
+        Log.i("play_initservice", MusicPlayService.class.getName());
 
         startservice(getApplicationContext());
-        Log.i("initservice", "bindService");
+        Log.i("play_initservice", "bindService");
 
         Intent bindIntent = new Intent(getApplicationContext(), MusicPlayService.class);
         //BIND_AUTO_CREATE会自动创建服务（如果服务并没有start）,这里设置0（不会自动start服务）
@@ -249,18 +257,22 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
-        if (receiverNameSinger != null)
+
+        super.onDestroy();
+        Log.i("Destroy","play music ");
+        if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
-        if (receiverSeek != null)
+        }
+        if (receiverSeek != null) {
             unregisterReceiver(receiverSeek);
+        }
         if (receiverExit != null){
             unregisterReceiver(receiverExit);
         }
         //注销
-        if (connection != null)
+        if (connection != null) {
             unbindService(connection);
-
-        super.onDestroy();
+        }
     }
 
     //广播 用来设置seekBar进度条
