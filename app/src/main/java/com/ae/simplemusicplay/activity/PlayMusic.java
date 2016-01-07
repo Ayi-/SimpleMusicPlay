@@ -13,8 +13,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -32,14 +30,12 @@ import com.ae.simplemusicplay.widgets.CircularSeekBar;
 import static com.ae.simplemusicplay.Util.StartService.startservice;
 
 public class PlayMusic extends Activity implements View.OnClickListener {
-    //播放次序
-    private Integer orderId;
+
     //歌曲名
     private TextView tv_name;
     //歌手名
     private TextView tv_singer;
-    //循环按钮
-    private ImageButton playOrder;
+
     //播放按钮
     private ImageButton imgbtn_play_play;
     //上一首
@@ -62,6 +58,9 @@ public class PlayMusic extends Activity implements View.OnClickListener {
     //定义一个广播，用来修改UI界面
     private NameSingerBroadCast receiverNameSinger;
     SharePreferenceUtils sharePreferenceUtils;
+
+    //定义一个广播，用来执行退出
+    private ExitBroadCast receiverExit;
 
     //临时使用Binder连接
     private ServiceConnection connection = new ServiceConnection() {
@@ -92,6 +91,13 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         sharePreferenceUtils = SharePreferenceUtils.getInstance(this);
         setOrderImagebutton();
         ImageButton cancelButton = (ImageButton) findViewById(R.id.cancel_action);
+
+        receiverExit = new ExitBroadCast();
+        IntentFilter filterExit = new IntentFilter();
+        filterExit.addAction(OpUtil.BROADCAST_EXIT);
+        registerReceiver(receiverExit, filterExit);
+
+        ImageButton cancelButton = (ImageButton)findViewById(R.id.cancel_action);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,9 +107,9 @@ public class PlayMusic extends Activity implements View.OnClickListener {
 
         //注册广播
         receiverSeek = new SeekBroadCast();
-        IntentFilter filterExit = new IntentFilter();
-        filterExit.addAction(OpUtil.BROADCAST_SEEKBAR);
-        registerReceiver(receiverSeek, filterExit);
+        IntentFilter filterSeek = new IntentFilter();
+        filterSeek.addAction(OpUtil.BROADCAST_SEEKBAR);
+        registerReceiver(receiverSeek, filterSeek);
 
         receiverNameSinger = new NameSingerBroadCast();
         IntentFilter filterNameSinger = new IntentFilter();
@@ -305,6 +311,9 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         if (receiverSeek != null) {
             unregisterReceiver(receiverSeek);
         }
+        if (receiverExit != null){
+            unregisterReceiver(receiverExit);
+        }
         //注销
         if (connection != null) {
             unbindService(connection);
@@ -331,6 +340,16 @@ public class PlayMusic extends Activity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             changeUI();
+        }
+    }
+
+    //广播 用来接收退出
+    public class ExitBroadCast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("exit", "exit");
+            finish();
         }
     }
 

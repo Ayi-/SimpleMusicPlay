@@ -38,11 +38,16 @@ import com.ae.simplemusicplay.Util.HanZiToPinYinUtils;
 import com.ae.simplemusicplay.Util.OpUtil;
 import com.ae.simplemusicplay.Util.SharePreferenceUtils;
 import com.ae.simplemusicplay.model.SongInfo;
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import org.litepal.crud.DataSupport;
+
+import java.io.File;
 
 import static com.ae.simplemusicplay.Util.StartService.startservice;
 import static com.ae.simplemusicplay.Util.ToastUtil.showToast;
@@ -75,6 +80,11 @@ public class MainActivity extends AppCompatActivity
 
     public static ImageLoader imageLoader = ImageLoader.getInstance();
     public static DisplayImageOptions options;
+    public static ImageLoaderConfiguration config;
+
+
+    //定义一个广播，用来执行退出
+    private ExitBroadCast receiverExit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,11 +184,34 @@ public class MainActivity extends AppCompatActivity
         filterNameSinger.addAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
         registerReceiver(receiverNameSinger, filterNameSinger);
 
-        imageLoader.init(ImageLoaderConfiguration.createDefault(this));
+
         options = new DisplayImageOptions.Builder()
                 .showImageForEmptyUri(R.mipmap.notice_icon) // resource or drawable
                 .showImageOnFail(R.mipmap.notice_icon)// resource or drawable
                 .build();
+
+        File cacheDir = StorageUtils.getCacheDirectory(this);
+        config = new ImageLoaderConfiguration.Builder(this)
+                .memoryCacheExtraOptions(480, 800) // default = device screen dimensions
+                .diskCacheExtraOptions(480, 800, null)
+                .threadPoolSize(3) // default
+                .denyCacheImageMultipleSizesInMemory()
+                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+                .memoryCacheSize(2 * 1024 * 1024)
+                .diskCacheSize(50 * 1024 * 1024)
+                .diskCacheFileCount(100)
+                .defaultDisplayImageOptions(options) // default
+                .writeDebugLogs()
+                .diskCache(new UnlimitedDiskCache(cacheDir)) // default
+                .build();
+        imageLoader.init(config);
+
+        //退出
+        receiverExit = new ExitBroadCast();
+        IntentFilter filterExit = new IntentFilter();
+        filterExit.addAction(OpUtil.BROADCAST_EXIT);
+        registerReceiver(receiverExit, filterExit);
+
     }
 
     //按返回键关掉菜单
@@ -493,6 +526,22 @@ public class MainActivity extends AppCompatActivity
         //注销广播
         if (receiverNameSinger != null) {
             unregisterReceiver(receiverNameSinger);
+        }
+        if (receiverExit != null){
+            unregisterReceiver(receiverExit);
+        }
+        if (playList != null)
+            playList = null;
+
+
+    }
+    //广播 用来接收退出
+    public class ExitBroadCast extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("exit", "exit");
+            finish();
         }
     }
 }

@@ -154,7 +154,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             /**
              * 通知设置
              */
-            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
+            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getAlbumId());
             //发送修改UI界面广播
             Intent intent = new Intent();
             intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
@@ -206,7 +206,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             /**
              * 通知设置
              */
-            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
+            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getAlbumId());
             //发送修改UI界面广播
             Intent intent = new Intent();
             intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
@@ -244,7 +244,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             /**
              * 通知设置
              */
-            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getArtistName());
+            showButtonNotify(getApplicationContext(), playList.isPlaying(), song.getSongName(), song.getAlbumId());
             //发送修改UI界面广播
             Intent intent = new Intent();
             intent.setAction(OpUtil.BROADCAST_PLAY_NAME_SINGER);
@@ -334,6 +334,7 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
 
         }
     }
+
 
     @Override
     public void onDestroy() {

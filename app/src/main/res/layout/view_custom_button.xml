@@ -43,6 +43,7 @@
 
 
                 <ImageButton
+                    android:id="@+id/clean_notify"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginRight="15dp"
