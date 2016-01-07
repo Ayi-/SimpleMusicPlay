@@ -119,16 +119,19 @@ public class MainActivity extends AppCompatActivity
             public void handleMessage(android.os.Message msg) {
                 Bundle bundle = msg.getData();
                 String message = bundle.getString("message");
-                showToast(getApplicationContext(), message);
-                //设置最后播放的歌曲和进度
-                Log.i("main handle",sharePreferenceUtils.getCurrentSongId()+"");
-                Log.i("main handle",sharePreferenceUtils.getCurrentPos()+"");
-                playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
-                playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
-                //修改UI
-                changeUI();
-                //启动服务
-                startservice(getApplicationContext());
+                if(!message.equals(""))
+                    showToast(getApplicationContext(), message);
+                else {
+                    //设置最后播放的歌曲和进度
+                    Log.i("main handle", sharePreferenceUtils.getCurrentSongId() + "");
+                    Log.i("main handle", sharePreferenceUtils.getCurrentPos() + "");
+                    playList.setCurrentPos(sharePreferenceUtils.getCurrentPos());
+                    playList.setCurrent(sharePreferenceUtils.getCurrentSongId());
+                    //修改UI
+                    changeUI();
+                    //启动服务
+                    startservice(getApplicationContext());
+                }
             }
         };
 
@@ -148,7 +151,8 @@ public class MainActivity extends AppCompatActivity
 
         //更新播放列表
 //        if (playList.getListsize() <= 0)
-        handler.post(runnable);
+        if(!sharePreferenceUtils.getScanFlag()||!sharePreferenceUtils.isFirstTimeUse()||playList.getListsize()<=0)
+            handler.post(runnable);
 
         //按钮事件注册
         imageIcon.setOnClickListener(this);
@@ -172,8 +176,8 @@ public class MainActivity extends AppCompatActivity
 
         imageLoader.init(ImageLoaderConfiguration.createDefault(this));
         options = new DisplayImageOptions.Builder()
-                .showImageForEmptyUri(R.mipmap.music5) // resource or drawable
-                .showImageOnFail(R.mipmap.music5)// resource or drawable
+                .showImageForEmptyUri(R.mipmap.notice_icon) // resource or drawable
+                .showImageOnFail(R.mipmap.notice_icon)// resource or drawable
                 .build();
     }
 
@@ -361,6 +365,8 @@ public class MainActivity extends AppCompatActivity
                 showToastForHandler(handler, "加载" + playList.getListsize() + "首歌");
                 Log.i("Simple", "加载" + playList.getListsize() + "首歌");
                 songListAdapter.notifyDataSetChanged();
+                //更新
+                showToastForHandler(handler,"");
             }
         }
     };

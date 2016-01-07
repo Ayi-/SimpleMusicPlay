@@ -78,7 +78,7 @@ public class NotifyUtil {
                 .setTicker("正在播放 "+name)
                 .setPriority(Notification.PRIORITY_DEFAULT)// 设置该通知优先级
                 .setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher);
+                .setSmallIcon(R.mipmap.launcher);
         Notification notify = mBuilder.build();
         notify.flags = Notification.FLAG_ONGOING_EVENT;
         //会报错，还在找解决思路
